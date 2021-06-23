@@ -80,6 +80,7 @@ evalCondition (COr condition1 condition2) room inventory flags
 evalCondition (CAnd condition1 condition2) room inventory flags 
     = evalCondition condition1 room inventory flags && evalCondition condition2 room inventory flags
 
+-- Imprimir el inventario actual
 printInventory :: Inventory -> IO ()
 printInventory (Inventory []) = do 
                             putStr "\n" 
@@ -255,19 +256,28 @@ stateChange _ endGames stateChanges Nothing
     = return Nothing
 
 stateChange Nothing _ stateChanges (Just (roomId, inventory, labels))
-    = return (Just (roomId, 
-        updateInventory inventory stateChanges,
-        updateLabels labels stateChanges))
+    = do
+        printInventoryFromStates stateChanges inventory
+        return (Just (roomId, updateInventory inventory stateChanges,updateLabels labels stateChanges))
 
 
 stateChange (Just (RoomChange nextRoom)) endGames stateChanges (Just (roomId, inventory, labels))
     = if nextRoom `elem` endGames
-        then printInvantoryMain inventory >> return Nothing 
+        then putStr "IO" >> return Nothing 
     else
+        do
+        printInventoryFromStates stateChanges inventory
         return (Just (nextRoom, updateInventory inventory stateChanges, updateLabels labels stateChanges))
 
 -- For exhaustic Pattern Matching
 stateChange _ _ _ _ = return Nothing
+
+printInventoryFromStates :: [StateChange] -> Inventory -> IO ()
+printInventoryFromStates [] inventory =  putStr ""
+printInventoryFromStates (PrintInventory : otherchanges) inventory =
+    printInvantoryMain inventory >> printInventoryFromStates otherchanges inventory
+printInventoryFromStates (_:otherchanges) inventory=
+    printInventoryFromStates otherchanges inventory
 
 
 performInteraction :: World -> String -> Inventory -> Labels -> [Sentence] -> IO (Maybe (String, Inventory, Labels))
