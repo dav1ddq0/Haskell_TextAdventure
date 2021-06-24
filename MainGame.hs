@@ -10,7 +10,7 @@ import Data.List.Split
 import Control.Monad
 
 textSplit :: [Char] -> [[Char]]
-textSplit = Data.List.Split.splitOneOf [' ', '\t']  
+textSplit = splitOneOf [' ', '\t']  
 
 readInput :: p1 -> p2 -> [Char] -> IO (Maybe [Sentence])
 readInput inventory flags text = do
@@ -50,11 +50,12 @@ adventure world (Just (roomId, inventory, labels)) =
 
 
 gameWorld :: World
-gameWorld = createWorld  rooms ends  communRoom 
+gameWorld = createWorld  rooms ends  commonActions 
         where (rooms, ends) = roomsMap
 
 gameStartMaybe :: Maybe ([Char], Inventory, Labels)
 gameStartMaybe = Just (startRoom , startInventory, startLabels )
+
 
 
 play :: IO ()
