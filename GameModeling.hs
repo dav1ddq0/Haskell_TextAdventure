@@ -4,7 +4,7 @@ import Data.List
 import qualified Data.List
 import qualified Data.Map
 import System.IO
-
+import GameUtils
 newtype Inventory = Inventory [String] deriving (Show, Eq)
 type SceneIndex = Int
 newtype Labels = Labels [String] deriving (Show, Eq)
@@ -14,6 +14,7 @@ data StateChange =  AddItemToInventory String|
                     PrintInventory |
                     AddTag String|
                     RemoveTag String|
+                    GTime |
                     Hit String|
                     PhysicAttack String|
                     RoomChange String deriving (Eq, Show)
@@ -21,22 +22,19 @@ data StateChange =  AddItemToInventory String|
 data GameCondition = YouAlreadyHaveThisItem String |
                     ThisRoom String|
                     LabelExist String|
-                    CTrue |
-                    CFalse |
-                    CNot GameCondition|
-                    COr GameCondition GameCondition|
-                    CAnd GameCondition GameCondition deriving (Eq, Show)
+                    GameTrue |
+                    GameFalse |
+                    GameNot GameCondition|
+                    GameOr GameCondition GameCondition|
+                    GameAnd GameCondition GameCondition deriving (Eq, Show)
 
-data Character = Character {
+data Player = Player {
     characterName ::String,
     characterLife :: Int,
-    characterMagic :: Int
-}
--- data ConditionalDescription = ConditionalDescrition{
---     condition::GameCondition,
---     conditionalDescription ::String,
---     conditionalStateChanges::[StateChange]
--- } deriving(Show, Eq)
+    characterMagic :: Int,
+    inventory :: [String]
+
+}deriving(Show,Eq)
 
 newtype ConditionalDescription = ConditionalDescription [(GameCondition, String, [StateChange])] deriving (Show, Eq)
 
@@ -60,24 +58,26 @@ data Room = Room {
 
 data World = World{
     rooms :: Data.Map.Map String Room,
+    player :: Player,
+    tags :: [String],
     endGames :: [String],
     defaulRoom :: Room
 }deriving (Show, Eq)
 
 evalCondition :: GameCondition  -> String -> Inventory -> Labels -> Bool
-evalCondition CTrue _ _ _ = True 
-evalCondition CFalse _ _ _ = False 
+evalCondition GameTrue _ _ _ = True 
+evalCondition GameFalse _ _ _ = False 
 evalCondition (YouAlreadyHaveThisItem item) _ (Inventory inventory) _ 
     = item `elem` inventory
 evalCondition (LabelExist label) _  _ (Labels labels)
     = label `elem` labels
 evalCondition (ThisRoom room) currentRoom _ _ = room == currentRoom
 
-evalCondition (CNot condition) room inventory flags 
+evalCondition (GameNot condition) room inventory flags 
     = not (evalCondition condition room inventory flags) 
-evalCondition (COr condition1 condition2) room inventory flags 
+evalCondition (GameOr condition1 condition2) room inventory flags 
     = evalCondition condition1 room inventory flags || evalCondition condition2 room inventory flags
-evalCondition (CAnd condition1 condition2) room inventory flags 
+evalCondition (GameAnd condition1 condition2) room inventory flags 
     = evalCondition condition1 room inventory flags && evalCondition condition2 room inventory flags
 
 -- Imprimir el inventario actual
@@ -97,10 +97,6 @@ printInvantoryMain :: Inventory -> IO ()
 printInvantoryMain inventory = putStrLn "Inventory:\n" >> printInventory inventory 
 
 
-
-getPairs :: Applicative f => f a1 -> f a2 -> f (a1, a2)
-getPairs a b = (,) <$> a <*> b
-
 matchInteraction :: (RoomInteraction, Sentence) -> Bool
 matchInteraction (RoomInteraction {sentences = roomSentences}, sentence)
     | sentence `elem` roomSentences = True
@@ -111,8 +107,7 @@ interactionSearch interactions sentences =
     find matchInteraction (getPairs interactions sentences) >>= (\(x,y)-> Just x) 
 
 
-searchInDicc :: Ord k => k -> Data.Map.Map k a -> Maybe a
-searchInDicc id map = Data.Map.lookup id map
+
 
 printRoomDescription :: World-> Maybe ([Char], Inventory, Labels)-> IO (Maybe (String, Inventory, Labels))
 printRoomDescription World{rooms = gameRooms, endGames = endScenes} Nothing
@@ -122,7 +117,7 @@ printRoomDescription World{rooms = gameRooms, endGames = endScenes} Nothing
 printRoomDescription World{rooms = gameRooms, endGames = endScenes} (Just (roomId, inventory,flags))
     = let room = searchInDicc roomId gameRooms
         in case room of
-            Nothing -> putStrLn (roomId ++ "it not a valid room") >> return Nothing
+            Nothing -> putStrLn (roomId ++ "Not valid room\n") >> return Nothing
             Just Room {roomDescription = description}
                 -> printConditionalDescription  endScenes description [] (Just (roomId, inventory, flags))
 
@@ -136,7 +131,6 @@ updateGameState endGames roomId inventory labels conditionalAction@(
                                             otherwise -> False) stateChanges)
                     endGames
                     stateChanges
-
 
 
 filterInteraction Room {roomInteractions = thisRoomInteraction} Room {roomInteractions = defaultRoomInteractions}
@@ -183,18 +177,26 @@ printConditionalDescription  endGames (ConditionalDescription ((condition , desc
 
 applyConditionalActions :: [Char]-> [String]-> Inventory-> Labels-> Maybe RoomInteraction-> Maybe RoomInteraction-> IO (Maybe ([Char], Inventory, Labels))
 applyConditionalActions roomId _ inventory flags Nothing Nothing
-    = do
-        putStr "You are not doing anything"
-        hFlush stdout
-        return (Just (roomId, inventory, flags))
+    = return (Just (roomId, inventory, flags))
 
 applyConditionalActions roomId endGames inventory flags (Just RoomInteraction {sentences = _, actions =[]}) defaultRoomInteractions
     = applyConditionalActions roomId endGames inventory flags Nothing defaultRoomInteractions
 
 applyConditionalActions roomId endGames inventory flags 
     (Just RoomInteraction {sentences = thisSentences,
-    actions = (conditionalAction@(ConditionalAction {actionCondition = thisCondition}) : remainingConditionalActions)}) defaultRoomInteractions
-    | evalCondition thisCondition roomId inventory flags = updateGameState endGames roomId inventory flags conditionalAction
+    actions = (conditionalAction@(ConditionalAction {actionCondition = thisCondition, actionStateChanges = thisStates}) : remainingConditionalActions)}) defaultRoomInteractions
+    | evalCondition thisCondition roomId inventory flags = do
+        result <- updateGameState endGames roomId inventory flags conditionalAction
+        if result == Nothing 
+            then return Nothing 
+        else
+            do
+            newRoomId <- getRoomId result
+            newInv <- getInv result
+            newLabels <- getTags result
+            applyConditionalActions newRoomId endGames newInv newLabels ( Just (RoomInteraction {sentences = thisSentences,
+                                                                actions = remainingConditionalActions})) defaultRoomInteractions
+
     | otherwise = applyConditionalActions roomId endGames inventory flags ( Just (RoomInteraction {sentences = thisSentences,
                                                                 actions = remainingConditionalActions})) defaultRoomInteractions
 
@@ -202,11 +204,42 @@ applyConditionalActions roomId endGames inventory flags
     Nothing (Just RoomInteraction {actions = []})
     = applyConditionalActions roomId endGames inventory flags Nothing Nothing
 
+
+
+
 applyConditionalActions roomId endGames inventory flags 
     Nothing (Just (RoomInteraction{sentences = thisSentences, actions = (conditionalAction@(ConditionalAction {actionCondition = thisCondition}):remainingConditionalActions)}))
-    | evalCondition thisCondition roomId inventory flags = updateGameState endGames roomId inventory flags conditionalAction
+    | evalCondition thisCondition roomId inventory flags = do
+        result <- updateGameState endGames roomId inventory flags conditionalAction
+        if result == Nothing 
+            then return Nothing 
+        else
+            do
+            newRoomId <- getRoomId result
+            newInv <- getInv result
+            newLabels <- getTags result
+            applyConditionalActions newRoomId endGames newInv newLabels Nothing (Just (RoomInteraction {sentences = thisSentences, actions = remainingConditionalActions}))  
+        
     | otherwise = applyConditionalActions roomId endGames inventory flags Nothing
                     (Just (RoomInteraction {sentences = thisSentences, actions = remainingConditionalActions}))
+
+
+getRoomId :: Monad m => Maybe ([Char], b, c) -> m [Char]
+getRoomId update = case update of
+        Nothing ->  return ""
+        Just (roomId, inventory, tags) -> return roomId
+
+
+getInv :: Monad m => Maybe (a, Inventory, c) -> m Inventory
+getInv update = case update of
+        Nothing ->  return (Inventory [])
+        Just (roomId, inventory, tags) -> return inventory
+
+
+getTags :: Monad m => Maybe (a, b, Labels) -> m Labels
+getTags update = case update of
+        Nothing ->  return (Labels [])
+        Just (roomId, inventory, tags) -> return tags
 
 newInvRemoveItem :: Inventory -> String -> Inventory
 newInvRemoveItem(Inventory items) item = Inventory (filter (/= item)  items)
@@ -258,16 +291,20 @@ stateChange _ endGames stateChanges Nothing
 stateChange Nothing _ stateChanges (Just (roomId, inventory, labels))
     = do
         printInventoryFromStates stateChanges inventory
+        printTimeFromStates stateChanges
         return (Just (roomId, updateInventory inventory stateChanges,updateLabels labels stateChanges))
 
 
 stateChange (Just (RoomChange nextRoom)) endGames stateChanges (Just (roomId, inventory, labels))
     = if nextRoom `elem` endGames
-        then putStr "IO" >> return Nothing 
+        then putStr "GameFinished" >> return Nothing 
     else
         do
+        printTimeFromStates stateChanges
         printInventoryFromStates stateChanges inventory
         return (Just (nextRoom, updateInventory inventory stateChanges, updateLabels labels stateChanges))
+
+
 
 -- For exhaustic Pattern Matching
 stateChange _ _ _ _ = return Nothing
@@ -279,6 +316,10 @@ printInventoryFromStates (PrintInventory : otherchanges) inventory =
 printInventoryFromStates (_:otherchanges) inventory=
     printInventoryFromStates otherchanges inventory
 
+printTimeFromStates :: [StateChange] -> IO ()
+printTimeFromStates [] = putStr ""
+printTimeFromStates (GTime:otherchanges) = getGameTime >> printTimeFromStates otherchanges
+printTimeFromStates (_:otherchanges) = printTimeFromStates otherchanges
 
 performInteraction :: World -> String -> Inventory -> Labels -> [Sentence] -> IO (Maybe (String, Inventory, Labels))
 performInteraction _ roomId inventory labels []
