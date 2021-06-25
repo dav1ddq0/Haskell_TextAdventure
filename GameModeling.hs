@@ -6,7 +6,7 @@ import qualified Data.Map
 import System.IO
 import GameUtils
 
-type Tag = [String]
+type Tags = [String]
 type Bag = [String]
 data GameAction     =  AddItemToBag String|
                     RemoveItemFromBag String |
@@ -59,7 +59,7 @@ data Location = Location {
 data World = World{
     locations :: Data.Map.Map String Location,
     player :: Player,
-    tags :: Tag,
+    tags :: Tags,
     endGames :: [String],
     communActions :: Location
 }deriving (Show, Eq)
@@ -286,9 +286,6 @@ getRoomId update = case update of
 --     printInventoryFromStates otherchanges inventory
 
 
--- printTimeFromStates [] = putStr ""
--- printTimeFromStates (GTime:otherchanges) = getGameTime >> printTimeFromStates otherchanges
--- printTimeFromStates (_:otherchanges) = printTimeFromStates otherchanges
 
 getRoomFromId :: World -> String -> Maybe Location
 getRoomFromId World{locations = gameLocations} roomId = searchInDicc roomId gameLocations

@@ -32,7 +32,7 @@ nouns = [
     Noun "east" ["east"],
     Noun "key" ["key"],
     Noun "door" ["door"],
-    Noun "inventory" ["inventory"],
+    Noun "bag" ["bag"],
     Noun "rhydon drill" ["rhydon drill"],
     Noun "magick stick" ["magic stick"],
     Noun "around" ["around"],
@@ -191,7 +191,7 @@ commonActions= Location{
             },
 
             LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["view","inventory"]],
+                interactionSentences = [getMeaningfulSentences ["view","bag"]],
                 interactionActions =[
                     InteractionAction {
                         actionCondition = GameTrue,

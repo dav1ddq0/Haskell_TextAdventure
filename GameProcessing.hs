@@ -82,12 +82,12 @@ addItemToBagAction items newItem
     | newItem `elem` items = items
     | otherwise = items ++ [newItem]
 
--- Remove item from the player inventory
+-- Remove item from the player bag
 removeItemFromBagAction :: Eq a => [a] -> a -> [a]
 removeItemFromBagAction items itemToRemove
     = filter (/= itemToRemove)  items
 
--- Print current player inventory
+-- Print current player bag
 
 printBag :: Bag -> IO ()
 printBag [] = do 
@@ -106,6 +106,21 @@ printBagMain bag name = do
                             printBag bag  
 
 -- ----------------------------------------------------------------------------------------
+
+-- Tags Actions
+-- -------------------------------------------------------------------
+-- Add new tag to the list of tags of the world
+
+addNewTag :: Eq a => [a] -> a -> [a]
+addNewTag tags newTag
+    | newTag `elem` tags = tags
+    | otherwise = tags ++ [newTag]
+
+-- Remove a tag from the list of tags of the world
+removeTag :: Eq a => [a] -> a -> [a]
+removeTag tags tag = filter (/= tag)  tags
+
+-- -------------------------------------------------------------------
 
 
 
@@ -153,7 +168,7 @@ exeGameAction ((RemoveItemFromBag item) : otherGameAction)
             endGames = thisEnds,
             communActions = thisDefault}) roomId
 
-exeGameAction (PrintBag  : otherGameAction) 
+exeGameAction (PrintBag  : otherGameActions) 
     world@World{locations = thisRooms,
         player = Player{
             playerName = thisPlayerName,
@@ -166,11 +181,50 @@ exeGameAction (PrintBag  : otherGameAction)
         roomId
     = do 
         printBagMain thisBag thisPlayerName
-        return (Just(world, roomId))
+        exeGameAction otherGameActions world roomId
+        
+
+exeGameAction (GTime  : otherGameActions) world roomId
+    = do 
+        getGameTime 
+        exeGameAction otherGameActions world roomId
+
+exeGameAction (AddTag tag  : otherGameActions) 
+    World{locations = thisRooms,
+        player =thisPlayer,
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        let newTags = addNewTag thisTags tag
+        exeGameAction otherGameActions
+            World{locations = thisRooms,
+            player =thisPlayer,
+            tags = newTags,
+            endGames =thisEnds,
+            communActions = thisDefault}  locationId
+
+exeGameAction (RemoveTag  tag  : otherGameActions) 
+    World{locations = thisRooms,
+        player =thisPlayer,
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        let newTags = removeTag thisTags tag
+        exeGameAction otherGameActions
+            World{locations = thisRooms,
+            player =thisPlayer,
+            tags = newTags,
+            endGames =thisEnds,
+            communActions = thisDefault}  locationId
+
+
 
 -- exhaustic pattern mathing
 exeGameAction _ _ _ = return Nothing 
-
 
 
 
