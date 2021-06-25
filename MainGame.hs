@@ -8,12 +8,13 @@ import GameData
 import GameParser
 import Data.List.Split
 import Control.Monad
-
+import GameProcessing
 textSplit :: [Char] -> [[Char]]
 textSplit = splitOneOf [' ', '\t']  
 
-readInput :: p1 -> p2 -> [Char] -> IO (Maybe [Sentence])
-readInput inventory flags text = do
+
+readInput :: [Char] -> IO (Maybe [Sentence])
+readInput  text = do
         hFlush stdout
         let tokens = textSplit text
         let sentenceTokenMatches = lexInput worldWords  tokens
@@ -23,44 +24,52 @@ readInput inventory flags text = do
         else
                 return (Just sentences)
 
-gameLoop :: World -> String -> Inventory -> Labels -> Maybe [Sentence] -> IO (Maybe (String, Inventory, Labels ))
-gameLoop _ _ _ _ Nothing = return Nothing 
-gameLoop world roomId inventory labels (Just []) = adventure world (Just (roomId, inventory, labels)) 
-gameLoop world roomId inventory labels (Just sentences) = do
-                performInteraction  world roomId inventory labels sentences >>= adventure world  
 
-updateAdventure :: World -> Maybe (String, Inventory, Labels) -> IO (Maybe (String, Inventory, Labels ))
-updateAdventure _ Nothing = return Nothing
-updateAdventure world (Just (roomId, inventory, labels))
+
+gameLoop :: World -> String -> Maybe [Sentence] -> IO (Maybe (World, String))
+gameLoop _ _ Nothing = return Nothing 
+gameLoop world roomId  (Just []) = goToAdventure (Just (world, roomId))
+gameLoop world roomId  (Just sentences) = do
+                resultP <-performInteraction  world roomId  sentences 
+                goToAdventure resultP 
+
+
+
+
+updateAdventure :: Maybe (World, String) -> IO (Maybe (World, String))
+updateAdventure Nothing = return Nothing
+updateAdventure (Just (world, roomId))
         = putStr "\n> " >> hFlush stdout >>
-        printInvalidInteractions world roomId >>
+        -- printInvalidInteractions world roomId >>
         getLine >>= 
-        readInput inventory labels >>=
+        readInput  >>=
         (\state -> putStr "\n" >> hFlush stdout >> return state) >>=
-        gameLoop world roomId inventory labels
-
-
-adventure :: World -> Maybe (String, Inventory, Labels) -> IO (Maybe (String, Inventory, Labels))
-adventure  _ Nothing = putStr "Thanks for playing" >> hFlush stdout >> return Nothing
-adventure world (Just (roomId, inventory, labels)) = 
-        printRoomDescription  world (Just (roomId, inventory, labels)) 
-        >>= updateAdventure world
+        gameLoop world roomId 
 
 
 
 
-gameWorld :: World
-gameWorld = createWorld  rooms ends  commonActions 
-        where (rooms, ends) = roomsMap
+goToAdventure :: Maybe  (World, String) -> IO (Maybe  (World, String))
+goToAdventure Nothing = putStr "Thanks for playing" >> hFlush stdout >> return Nothing
+goToAdventure (Just (world,roomId))  = updateAdventure (Just (world,roomId))
 
-gameStartMaybe :: Maybe ([Char], Inventory, Labels)
-gameStartMaybe = Just (startRoom , startInventory, startLabels )
+
+
+
+gameWorld :: Player -> World
+gameWorld player = createWorld  rooms ends  commonActions player     
+        where (rooms, ends) = locationsMap
+
+-- gameStartMaybe :: Maybe ([Char], Inventory, Labels)
+-- gameStartMaybe = Just (startRoom , startInventory, startTags  )
+
 
 
 
 play :: IO ()
 play = do
+        player <- buildPlayer
         putStrLn intro 
         hFlush stdout 
-        adventure gameWorld gameStartMaybe
+        goToAdventure (Just (gameWorld player,startLocation)) 
         return ()

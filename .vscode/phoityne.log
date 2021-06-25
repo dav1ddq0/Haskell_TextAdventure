@@ -1,0 +1,18 @@
+2021-06-24 14:42:38.749690922000 [43429(ThreadId 9)] ERROR APP - user error (<getModule> loaded module can not find from path. </mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/test.hs> [])
+2021-06-24 14:42:38.773575288000 [43429(ThreadId 9)] ERROR APP - start debugging failed. user error (ExecResult not found.) : Left "user error (ExecResult not found.)"
+2021-06-24 14:43:04.660444885000 [43429(ThreadId 9)] ERROR APP - user error (<getModule> loaded module can not find from path. </mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/test.hs> [])
+2021-06-24 14:45:23.146649049000 [43862(ThreadId 9)] ERROR APP - user error (<getModule> loaded module can not find from path. </mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/test.hs> [])
+2021-06-24 14:45:23.175419771000 [43862(ThreadId 9)] ERROR APP - start debugging failed. user error (ExecResult not found.) : Left "user error (ExecResult not found.)"
+2021-06-24 14:45:41.254178365000 [44086(ThreadId 9)] ERROR APP - user error (<getModule> loaded module can not find from path. </mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/MainGame.hs> [])
+2021-06-24 14:45:41.295019176000 [44086(ThreadId 9)] ERROR APP - user error (<getModule> loaded module can not find from path. </mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/test.hs> [])
+2021-06-24 14:45:41.377258080000 [44086(ThreadId 9)] ERROR APP - start debugging failed. user error (ExecResult not found.) : Left "user error (ExecResult not found.)"
+2021-06-24 14:46:18.024900341000 [44229(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:46:32.685189856000 [44279(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:46:54.018727509000 [44334(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:50:11.119835165000 [44859(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:53:52.052149546000 [45675(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:54:58.830071970000 [45894(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:56:25.048331985000 [46040(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:57:47.360550574000 [46265(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 14:57:54.829250837000 [46319(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2021-06-24 22:46:35.629479349000 [72769(ThreadId 9)] ERROR APP - start debugging failed. user error (ExecResult not found.) : Left "user error (ExecResult not found.)"
