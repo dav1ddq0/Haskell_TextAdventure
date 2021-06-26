@@ -17,7 +17,7 @@ data GameAction     =  AddItemToBag String|
                     Hit String|
                     PhysicAttack String|
                     MagicAttack String|
-                    RoomChange String deriving (Eq, Show)
+                    NextLocation String deriving (Eq, Show)
 
 data GameCondition = YouAlreadyHaveThisItem String |
                     ThisLocation String|
@@ -73,8 +73,6 @@ getRoomId update = case update of
         Just (roomId, inventory, tags) -> return roomId
 
 
-getRoomFromId :: World -> String -> Maybe Location
-getRoomFromId World{locations = gameLocations} roomId = searchInDicc roomId gameLocations
 
 
 -- hasInvalidInteractions :: [RoomInteraction] -> Maybe RoomInteraction

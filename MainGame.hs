@@ -63,6 +63,9 @@ play :: IO ()
 play = do
         player <- buildPlayer
         putStrLn intro 
-        hFlush stdout 
-        goToAdventure (Just (gameWorld player,startLocation)) 
+        hFlush stdout
+        let newWorld = gameWorld player 
+        let location = getLocationFromId newWorld startLocation
+        printLocationDescription location
+        goToAdventure (Just (newWorld,startLocation)) 
         return ()

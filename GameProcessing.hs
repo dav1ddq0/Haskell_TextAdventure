@@ -47,9 +47,9 @@ searchSInteraction interactions sentences =
 -- --------------------------------------------------------------------------------
 
 -- Print the description of the stage
-printRoomDescription :: Maybe Location-> IO ()
-printRoomDescription Nothing = putStr ""
-printRoomDescription (Just Location{locationDescription=thisDescription}) =
+printLocationDescription :: Maybe Location-> IO ()
+printLocationDescription Nothing = putStr ""
+printLocationDescription (Just Location{locationDescription=thisDescription}) =
     putStr thisDescription
 
 
@@ -149,7 +149,7 @@ exeGameAction ((AddItemToBag item) : otherGameAction)
             communActions = thisDefault}) locationId
 
 exeGameAction ((RemoveItemFromBag item) : otherGameAction) 
-    World{locations = thisRooms,
+    World{locations = thisLocations,
         player = Player{
             playerName = thisPlayerName,
             playerLife = thisPlayerLife,
@@ -162,14 +162,14 @@ exeGameAction ((RemoveItemFromBag item) : otherGameAction)
     = do 
         let newBag =  removeItemFromBagAction thisInventory item
         exeGameAction otherGameAction (World{
-            locations = thisRooms,
+            locations = thisLocations,
             player = (Player{playerName = thisPlayerName,playerLife = thisPlayerLife,playerMagic = thisPlayerMagic,bag= newBag}),
             tags = thisTags,
             endGames = thisEnds,
             communActions = thisDefault}) locationId
 
 exeGameAction (PrintBag  : otherGameActions) 
-    world@World{locations = thisRooms,
+    world@World{locations = thisLocations,
         player = Player{
             playerName = thisPlayerName,
             playerLife = thisPlayerLife,
@@ -190,7 +190,7 @@ exeGameAction (GTime  : otherGameActions) world locationId
         exeGameAction otherGameActions world locationId
 
 exeGameAction (AddTag tag  : otherGameActions) 
-    World{locations = thisRooms,
+    World{locations = thisLocations,
         player =thisPlayer,
         tags = thisTags,
         endGames =thisEnds,
@@ -199,14 +199,14 @@ exeGameAction (AddTag tag  : otherGameActions)
     = do 
         let newTags = addNewTag thisTags tag
         exeGameAction otherGameActions
-            World{locations = thisRooms,
+            World{locations = thisLocations,
             player =thisPlayer,
             tags = newTags,
             endGames =thisEnds,
             communActions = thisDefault}  locationId
 
 exeGameAction (RemoveTag  tag  : otherGameActions) 
-    World{locations = thisRooms,
+    World{locations = thisLocations,
         player =thisPlayer,
         tags = thisTags,
         endGames =thisEnds,
@@ -215,11 +215,25 @@ exeGameAction (RemoveTag  tag  : otherGameActions)
     = do 
         let newTags = removeTag thisTags tag
         exeGameAction otherGameActions
-            World{locations = thisRooms,
+            World{locations = thisLocations,
             player =thisPlayer,
             tags = newTags,
             endGames =thisEnds,
             communActions = thisDefault}  locationId
+
+exeGameAction (NextLocation newLocationId: otherGameActions) 
+    world@World{locations = thisLocations,
+        player =thisPlayer,
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        if newLocationId `elem` thisEnds 
+            then return Nothing
+        else do
+            printLocationDescription (getLocationFromId world newLocationId)
+            return (Just (world,newLocationId))
 
 
 
@@ -291,8 +305,11 @@ getMatchedInteractions  World {communActions = Location{locationInteractions=com
                         else
                             return maybeInteractionFromCommun
 
-
-
+-- Dado un id de location valido devuelve el locaction que corresponde al mismo
+-- ----------------------------------------------------------------------------------------------
+getLocationFromId :: World -> String -> Maybe Location
+getLocationFromId World{locations = gameLocations} locationId = searchInDicc locationId gameLocations
+-- -----------------------------------------------------------------------------------------------
 printNotInteractionFoundError :: IO ()
 printNotInteractionFoundError =
     putStr "Are you sure you wanted to tell me that?\n"
@@ -306,7 +323,7 @@ performInteraction world locationId  []
 
 
 performInteraction world locationId  sentences
-    = let location = getRoomFromId world locationId
+    = let location = getLocationFromId world locationId
         in case location of
             Nothing -> hFlush stdout 
                 >> putStrLn ("The location" ++ locationId ++ "is not a valid location") 
@@ -321,7 +338,7 @@ performInteraction world locationId  sentences
                         return (Just (world, locationId))
                 else
                     do
-                        printRoomDescription location
+                        
                         pureInteraction <- getNotMaybeRoomIntegration interactions
                         pureNotMaybeRoom <- getNotMaybeRoomId location
                         let actions = getValidConditionalActions world pureNotMaybeRoom pureInteraction
