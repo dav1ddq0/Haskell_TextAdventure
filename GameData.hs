@@ -21,7 +21,8 @@ verbs = [
     Verb "look" ["look"],
     Verb "give me" ["give me"],
     Verb "go to" ["go to"],
-    Verb "use" ["use"]
+    Verb "use" ["use"],
+    Verb "break" ["break"]
     ]
 
 nouns :: [Token]
@@ -37,6 +38,7 @@ nouns = [
     Noun "magick stick" ["magic stick"],
     Noun "around" ["around"],
     Noun "time" ["time"],
+    Noun "big rock" ["big rock"],
     Noun "mantra fusion" ["mantra fusion"],
     Noun "[rhydon drill, magick stick]" ["[rhydon drill, magick stick]","[magick stick, rhydon drill]"]
     ]
@@ -82,7 +84,7 @@ azukiarai = Location {
                         actionGameActions  =  []
                     },
                     InteractionAction{
-                        actionCondition = TagExist  "rock moved",
+                        actionCondition = TagExist  "rock removed",
                         actionDescription = "The big rock was removed the exit is clear\n",
                         actionGameActions = []
                     }
@@ -114,7 +116,7 @@ azukiarai = Location {
                     },
                     InteractionAction{
                         actionCondition = YouAlreadyHaveThisItem "magick stick",
-                        actionDescription = "This object has already been taken\n",
+                        actionDescription = "This item has already been taken\n",
                         actionGameActions  = []
                     }
                 ]
@@ -137,8 +139,7 @@ azukiarai = Location {
                 ]
             },
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["use", "mantra fusion", "with", "[magick stick, rhydon drill]"],
-                            getMeaningfulSentences ["use", "mantra fusion", "with", "[rhydon drill, magick stick]"]],
+                interactionSentences = [getMeaningfulSentences ["use", "mantra fusion"]],
                 
                 interactionActions =[
                     InteractionAction{
@@ -164,11 +165,34 @@ azukiarai = Location {
                         actionGameActions  =[AddItemToBag "rockbreaker", RemoveItemFromBag "rhydon drill", RemoveItemFromBag "magick stick"]
                     }
                 ]
-            }
-            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["break", "big rock"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd (GameNot (TagExist  "rock removed")) (YouAlreadyHaveThisItem "rockbreaker"),
+                        actionDescription = "Use rockbreaker to break the big rock that blocks the exit of the cave.\n", 
+                        actionGameActions  =[AddTag "rock removed"]
+                    },
+
+                    InteractionAction{
+                        actionCondition = TagExist  "rock removed",
+                        actionDescription = "The big rock has already been removed.\n", 
+                        actionGameActions  =[]
+                    },
+
+                    InteractionAction{
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "rockbreaker"),
+                        actionDescription = "You have nothing to remove the rock.\n", 
+                        actionGameActions  = []
+                    }
+
+                ]
 
             
-            ]
+            }
+        ]
 }
 
 
@@ -235,6 +259,11 @@ createWorld locations ends defaulRoom player=
     communActions = defaulRoom
     }
 
+-- Inicializacions
+-- -----------------------------------------------------------------
+gameWorld :: Player -> World
+gameWorld = createWorld  rooms ends  commonActions     
+        where (rooms, ends) = locationsMap
 
 
 buildPlayer :: IO Player
@@ -252,7 +281,7 @@ createPlayer name  =
         bag= ["pocion"]
     }
 
-
+-- ----------------------------------------------------------------
 
 locationsMap :: (Map [Char] Location , [[Char]])
 locationsMap = (Data.Map.fromList [("azukiarai",azukiarai),("scen1", scene1)], ["scene1"])

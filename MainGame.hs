@@ -6,13 +6,11 @@ import GameModeling
 import GameLexer
 import GameData
 import GameParser
-import Data.List.Split
+import GameUtils
 import Control.Monad
 import GameProcessing
-textSplit :: [Char] -> [[Char]]
-textSplit = splitOneOf [' ', '\t']  
 
-
+-- Parse input and obtein possible sentences from it
 readInput :: [Char] -> IO (Maybe [Sentence])
 readInput  text = do
         hFlush stdout
@@ -20,7 +18,10 @@ readInput  text = do
         let sentenceTokenMatches = lexInput worldWords  tokens
         let sentences = parseSentence sentenceTokenMatches
         if null sentences 
-                then putStr "You have not entered valid text. Please write a valid text\n\n" >> hFlush stdout >> return (Just sentences)
+                then do
+                        putStr "I do not understand.\nWhat are you wanting to tell me" 
+                        hFlush stdout 
+                        return (Just sentences)
         else
                 return (Just sentences)
 
@@ -28,9 +29,9 @@ readInput  text = do
 
 gameLoop :: World -> String -> Maybe [Sentence] -> IO (Maybe (World, String))
 gameLoop _ _ Nothing = return Nothing 
-gameLoop world roomId  (Just []) = goToAdventure (Just (world, roomId))
-gameLoop world roomId  (Just sentences) = do
-                resultP <-performInteraction  world roomId  sentences 
+gameLoop world locationId  (Just []) = goToAdventure (Just (world, locationId))
+gameLoop world locationId  (Just sentences) = do
+                resultP <-performInteraction  world locationId  sentences 
                 goToAdventure resultP 
 
 
@@ -38,33 +39,25 @@ gameLoop world roomId  (Just sentences) = do
 
 updateAdventure :: Maybe (World, String) -> IO (Maybe (World, String))
 updateAdventure Nothing = return Nothing
-updateAdventure (Just (world, roomId))
-        = putStr "\n> " >> hFlush stdout >>
-        -- printInvalidInteractions world roomId >>
-        getLine >>= 
-        readInput  >>=
-        (\state -> putStr "\n" >> hFlush stdout >> return state) >>=
-        gameLoop world roomId 
+updateAdventure (Just (world, locationId))=do 
+        putStr "\n> " 
+        hFlush stdout
+        -- printInvalidInteractions world locationId >>
+        line <- getLine 
+        readInput  line >>= (\state -> putStr "\n" >> hFlush stdout >> return state) 
+        >>= gameLoop world locationId 
 
 
 
 
 goToAdventure :: Maybe  (World, String) -> IO (Maybe  (World, String))
 goToAdventure Nothing = putStr "Thanks for playing" >> hFlush stdout >> return Nothing
-goToAdventure (Just (world,roomId))  = updateAdventure (Just (world,roomId))
+goToAdventure (Just (world,locationId))  = updateAdventure (Just (world,locationId))
 
 
 
-
-gameWorld :: Player -> World
-gameWorld player = createWorld  rooms ends  commonActions player     
-        where (rooms, ends) = locationsMap
-
--- gameStartMaybe :: Maybe ([Char], Inventory, Labels)
--- gameStartMaybe = Just (startRoom , startInventory, startTags  )
-
-
-
+-- Play the Game :)
+-- --------------------------------------------------------------
 
 play :: IO ()
 play = do

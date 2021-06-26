@@ -4,7 +4,7 @@ import Data.Map
 import Data.Time
 import Data.Time.Clock
 import Data.Time.LocalTime
-
+import Data.List.Split
 -- devuele la hora actual de la pc en la que se este corriendo el juego
 -------------------------------------------------------------------------------------
 getGameTime :: IO ()
@@ -29,4 +29,8 @@ searchInDicc = Data.Map.lookup
 getPairs :: Applicative f => f a1 -> f a2 -> f (a1, a2)
 getPairs a b = (,) <$> a <*> b
 
+-- -----------------------------------------------------------------------------------
 
+textSplit :: [Char] -> [[Char]]
+textSplit = splitOneOf [' ', '\t']  
+-- -----------------------------------------------------------------------------------

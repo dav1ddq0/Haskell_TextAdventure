@@ -56,16 +56,16 @@ printRoomDescription (Just Location{locationDescription=thisDescription}) =
 -- Execute  each action given a list of actions
 -- ---------------------------------------------------------------------------------
 exeStageAction :: [InteractionAction]-> World -> [Char] -> IO (Maybe (World, [Char]))
-exeStageAction [] world roomId =
-    return (Just(world,roomId))
+exeStageAction [] world locationId =
+    return (Just(world,locationId))
     
 exeStageAction (InteractionAction{
     actionDescription = thisDescription,
     actionGameActions = thisGameActions}:otherStageActions) 
-    world roomId
+    world locationId
     = do
         printDescription thisDescription
-        outEx <-exeGameAction thisGameActions world roomId
+        outEx <-exeGameAction thisGameActions world locationId
         newRoomId <- getRoomIdFromMaybeT outEx
         newWorld <- getWorldFromMaybe outEx
         exeStageAction otherStageActions newWorld newRoomId
@@ -125,8 +125,8 @@ removeTag tags tag = filter (/= tag)  tags
 
 
 exeGameAction :: [GameAction] -> World -> String -> IO (Maybe (World, String))
-exeGameAction [] world roomId  = 
-    return (Just(world, roomId))
+exeGameAction [] world locationId  = 
+    return (Just(world, locationId))
 
 exeGameAction ((AddItemToBag item) : otherGameAction) 
     World{locations = thisStages,
@@ -138,7 +138,7 @@ exeGameAction ((AddItemToBag item) : otherGameAction)
         tags = thisTags,
         endGames =thisEnds,
         communActions = thisDefault}
-        roomId
+        locationId
     = do 
         let newBag =  addItemToBagAction thisBag item
         exeGameAction otherGameAction (World{
@@ -146,7 +146,7 @@ exeGameAction ((AddItemToBag item) : otherGameAction)
             player = (Player{playerName = thisPlayerName,playerLife = thisPlayerLife,playerMagic = thisPlayerMagic,bag = newBag}),
             tags = thisTags,
             endGames = thisEnds,
-            communActions = thisDefault}) roomId
+            communActions = thisDefault}) locationId
 
 exeGameAction ((RemoveItemFromBag item) : otherGameAction) 
     World{locations = thisRooms,
@@ -158,7 +158,7 @@ exeGameAction ((RemoveItemFromBag item) : otherGameAction)
         tags = thisTags,
         endGames =thisEnds,
         communActions = thisDefault}
-        roomId
+        locationId
     = do 
         let newBag =  removeItemFromBagAction thisInventory item
         exeGameAction otherGameAction (World{
@@ -166,7 +166,7 @@ exeGameAction ((RemoveItemFromBag item) : otherGameAction)
             player = (Player{playerName = thisPlayerName,playerLife = thisPlayerLife,playerMagic = thisPlayerMagic,bag= newBag}),
             tags = thisTags,
             endGames = thisEnds,
-            communActions = thisDefault}) roomId
+            communActions = thisDefault}) locationId
 
 exeGameAction (PrintBag  : otherGameActions) 
     world@World{locations = thisRooms,
@@ -178,16 +178,16 @@ exeGameAction (PrintBag  : otherGameActions)
         tags = thisTags,
         endGames =thisEnds,
         communActions = thisDefault}
-        roomId
+        locationId
     = do 
         printBagMain thisBag thisPlayerName
-        exeGameAction otherGameActions world roomId
+        exeGameAction otherGameActions world locationId
         
 
-exeGameAction (GTime  : otherGameActions) world roomId
+exeGameAction (GTime  : otherGameActions) world locationId
     = do 
         getGameTime 
-        exeGameAction otherGameActions world roomId
+        exeGameAction otherGameActions world locationId
 
 exeGameAction (AddTag tag  : otherGameActions) 
     World{locations = thisRooms,
@@ -230,23 +230,37 @@ exeGameAction _ _ _ = return Nothing
 
     
 printDescription :: String -> IO ()
-printDescription description =
-    putStrLn description
+printDescription  = putStrLn 
 
 
 getWorldFromMaybe :: Monad m => Maybe (World, b) -> m World
 getWorldFromMaybe input = case input of
-    Nothing -> return World{}
-    Just (world, roomId) -> return world
+    Nothing -> return World{
+        locations =Data.Map.empty,
+        tags = [],
+        endGames = [], 
+        communActions = Location "" "" [],
+        player = Player{
+            playerName = "",
+            playerLife = 0,
+            playerMagic =0,
+            bag= []
+        }
+
+    }
+
+    
+    Just (world, locationId) -> return world
 
 getRoomIdFromMaybeT :: Monad m => Maybe (a, [Char]) -> m [Char]
 getRoomIdFromMaybeT input = case input of
     Nothing -> return ""
-    Just (world, roomId) -> return roomId
+    Just (world, locationId) -> return locationId
 
 
 
 
+getNotMaybeRoomId :: Monad m => Maybe Location -> m Location
 getNotMaybeRoomId room = case room of
     Nothing -> return Location{locationId ="", locationDescription ="", locationInteractions = []}
     Just word -> return word
@@ -279,27 +293,37 @@ getMatchedInteractions  World {communActions = Location{locationInteractions=com
 
 
 
+printNotInteractionFoundError :: IO ()
+printNotInteractionFoundError =
+    putStr "Are you sure you wanted to tell me that?\n"
 
-performInteraction world roomId  []
+performInteraction :: World -> [Char] -> [Sentence] -> IO (Maybe (World, [Char]))
+performInteraction world locationId  []
     = putStrLn "Please enter a command.">>
     hFlush stdout>>
-    return (Just (world, roomId))
+    return (Just (world, locationId))
 
 
-performInteraction world roomId  sentences
-    = let room = getRoomFromId world roomId
-        in case room of
-            Nothing -> hFlush stdout >> putStrLn (roomId ++ "is not a valid room") >> return Nothing 
+
+performInteraction world locationId  sentences
+    = let location = getRoomFromId world locationId
+        in case location of
+            Nothing -> hFlush stdout 
+                >> putStrLn ("The location" ++ locationId ++ "is not a valid location") 
+                >> return Nothing 
             Just newRoom -> hFlush stdout >>
                 do 
                 interactions  <- getMatchedInteractions world newRoom sentences
 
-                if interactions == Nothing  then return (Just (world, roomId))
+                if interactions == Nothing  
+                    then do
+                        printNotInteractionFoundError
+                        return (Just (world, locationId))
                 else
                     do
-                        printRoomDescription room
+                        printRoomDescription location
                         pureInteraction <- getNotMaybeRoomIntegration interactions
-                        pureNotMaybeRoom <- getNotMaybeRoomId room
+                        pureNotMaybeRoom <- getNotMaybeRoomId location
                         let actions = getValidConditionalActions world pureNotMaybeRoom pureInteraction
-                        exeStageAction actions world roomId 
+                        exeStageAction actions world locationId 
 
