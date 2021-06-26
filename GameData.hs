@@ -6,8 +6,9 @@ import GameLexer
 import Data.Time.Clock
 import Data.Map
 import System.IO
-intro :: [Char]
-intro = "\n At the top of a mountain in Dhaka a desolate traveler sees an object of strange value when suddenly\n" ++ 
+
+intro :: Player -> [Char]
+intro Player{playerName =thisName}= "\nAt the top of a mountain in Dhaka a desolate traveler called "++thisName ++ " sees an object of strange value when suddenly\n" ++ 
         "a mysterious portal opens in front of him that leads to the daconic world of Fireblood.\n"++ 
         "A mysterious force pushes him and he appears suddenly in an unexpected place of the same.\n\n"
 
@@ -22,7 +23,8 @@ verbs = [
     Verb "give me" ["give me"],
     Verb "go to" ["go to"],
     Verb "use" ["use"],
-    Verb "break" ["break"]
+    Verb "break" ["break"],
+    Verb "leave" ["leave"]
     ]
 
 nouns :: [Token]
@@ -35,12 +37,14 @@ nouns = [
     Noun "door" ["door"],
     Noun "bag" ["bag"],
     Noun "rhydon drill" ["rhydon drill"],
-    Noun "magick stick" ["magic stick"],
+    Noun "magic stick" ["magic stick"],
     Noun "around" ["around"],
     Noun "time" ["time"],
     Noun "big rock" ["big rock"],
     Noun "mantra fusion" ["mantra fusion"],
-    Noun "[rhydon drill, magick stick]" ["[rhydon drill, magick stick]","[magick stick, rhydon drill]"]
+    Noun "cave" ["cave"],
+    Noun "Xerneas spectrum" ["Xerneas spectrum"],
+    Noun "[rhydon drill, magic stick]" ["[rhydon drill, magic stick]","[magic stick, rhydon drill]"]
     ]
 
 prepositions :: [Token]
@@ -62,7 +66,7 @@ getMeaningfulSentences  = meaningfulSentence verbs nouns prepositions
 azukiarai :: Location
 azukiarai = Location {
     locationId = "Azukiarai",
-    locationDescription = "You find yourself in a place a bit desolate like a cave\n",
+    locationDescription = "*AZUKIARAI CAVE*\nYou find yourself in a place a bit desolate like a cave\n",
     locationInteractions =
         [
             LocationInteraction{
@@ -74,7 +78,7 @@ azukiarai = Location {
                         actionGameActions  =[]
                     },
                     InteractionAction{
-                        actionCondition = GameNot (YouAlreadyHaveThisItem "magick stick"),
+                        actionCondition = GameNot (YouAlreadyHaveThisItem "magic stick"),
                         actionDescription = "There is a magic stick near the lava river.\n",
                         actionGameActions = []
                     },
@@ -107,15 +111,15 @@ azukiarai = Location {
                 ]
             },
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["get", "magick stick"]],
+                interactionSentences = [getMeaningfulSentences ["get", "magic stick"]],
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameNot (YouAlreadyHaveThisItem "magick stick"),
-                        actionDescription = "You get magick stick item\n",
-                        actionGameActions = [AddItemToBag "magick stick"]
+                        actionCondition = GameNot (YouAlreadyHaveThisItem "magic stick"),
+                        actionDescription = "You get magic stick item\n",
+                        actionGameActions = [AddItemToBag "magic stick"]
                     },
                     InteractionAction{
-                        actionCondition = YouAlreadyHaveThisItem "magick stick",
+                        actionCondition = YouAlreadyHaveThisItem "magic stick",
                         actionDescription = "This item has already been taken\n",
                         actionGameActions  = []
                     }
@@ -148,8 +152,8 @@ azukiarai = Location {
                         actionGameActions  =[]
                     },
                     InteractionAction{
-                        actionCondition = GameNot (YouAlreadyHaveThisItem "magick stick"),
-                        actionDescription = "I don't have the item magick stick in my inventory.\n", 
+                        actionCondition = GameNot (YouAlreadyHaveThisItem "magic stick"),
+                        actionDescription = "I don't have the item magic stick in my inventory.\n", 
                         actionGameActions  =[]
                     },
                     InteractionAction{
@@ -159,10 +163,10 @@ azukiarai = Location {
                     },
                     InteractionAction{
                         actionCondition = GameAnd (YouAlreadyHaveThisItem "rhydon drill")
-                        (GameAnd (YouAlreadyHaveThisItem "magick stick") (TagExist  "You got mantra fusion")),
+                        (GameAnd (YouAlreadyHaveThisItem "magic stick") (TagExist  "You got mantra fusion")),
                         actionDescription =  "The mantra fusion magic began\n"++
-                        "....\n"++ "A strong light has emerged.\n" ++ "You have obtained a new item:\n rockbreaker",
-                        actionGameActions  =[AddItemToBag "rockbreaker", RemoveItemFromBag "rhydon drill", RemoveItemFromBag "magick stick"]
+                        "....\n"++ "A strong light has emerged.\n" ++ "You have obtained a new item:\n*rockbreaker*",
+                        actionGameActions  =[AddItemToBag "rockbreaker", RemoveItemFromBag "rhydon drill", RemoveItemFromBag "magic stick"]
                     }
                 ]
             },
@@ -186,6 +190,26 @@ azukiarai = Location {
                         actionCondition = GameNot(YouAlreadyHaveThisItem "rockbreaker"),
                         actionDescription = "You have nothing to remove the rock.\n", 
                         actionGameActions  = []
+                    }
+
+                ]
+
+            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["leave", "the", "cave"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameNot (TagExist  "rock removed"),
+                        actionDescription = "You can't leave the cave.\nA big rock blocks the exit\n", 
+                        actionGameActions  =[]
+                    },
+
+                    InteractionAction{
+                        actionCondition = TagExist  "rock removed",
+                        actionDescription = "The traveler manages to get out of the burning cave\n", 
+                        actionGameActions  = [NextLocation "casentinesi"]
                     }
 
                 ]
@@ -239,13 +263,16 @@ commonActions= Location{
         ]
 }
 
-scene1 :: Location
-scene1 =
+casentinesi:: Location
+casentinesi =
     Location
     {
-        locationId = "UI",
-        locationDescription = "",
-        locationInteractions = []
+        locationId = "casentinesi",
+        locationDescription = "*CASENTINESI BLOOD FOREST*\nYou have entered the bloody forest of Casentinesi " ++ 
+        "where the trees feed on the blood of the dead ...",
+        locationInteractions = [
+
+        ]
     }
 
 
@@ -284,4 +311,4 @@ createPlayer name  =
 -- ----------------------------------------------------------------
 
 locationsMap :: (Map [Char] Location , [[Char]])
-locationsMap = (Data.Map.fromList [("azukiarai",azukiarai),("scen1", scene1)], ["scene1"])
+locationsMap = (Data.Map.fromList [("azukiarai",azukiarai),("casentinesi", casentinesi)], ["todavia"])

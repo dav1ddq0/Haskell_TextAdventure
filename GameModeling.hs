@@ -66,29 +66,3 @@ data World = World{
 
 
 
-
-getRoomId :: Monad m => Maybe ([Char], b, c) -> m [Char]
-getRoomId update = case update of
-        Nothing ->  return ""
-        Just (roomId, inventory, tags) -> return roomId
-
-
-
-
--- hasInvalidInteractions :: [RoomInteraction] -> Maybe RoomInteraction
--- hasInvalidInteractions [] = Nothing
--- hasInvalidInteractions (interaction@(RoomInteraction {sentences = thisSentences}) : remainingInteractions)
---     | NullSentence `elem` thisSentences = Just interaction
---     | otherwise = hasInvalidInteractions remainingInteractions
-
--- printInvalidInteractions :: World -> String -> IO ()
--- printInvalidInteractions world@(World {rooms = thisRooms}) roomId
---     = let room = searchInDicc roomId thisRooms 
---         in case room of
---         Nothing -> putStrLn (roomId ++ " is not a valid scene") >> return ()
---         Just Room {roomInteractions = thisInteractions}
---             -> case hasInvalidInteractions thisInteractions of
---                     Nothing -> return ()
---                     Just interaction@(RoomInteraction {sentences = thisSentences}) -> putStrLn ("Invalid interaction: " ++  (show interaction))
-
-

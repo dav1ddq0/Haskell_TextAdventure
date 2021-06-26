@@ -62,7 +62,7 @@ goToAdventure (Just (world,locationId))  = updateAdventure (Just (world,location
 play :: IO ()
 play = do
         player <- buildPlayer
-        putStrLn intro 
+        putStrLn (intro player)
         hFlush stdout
         let newWorld = gameWorld player 
         let location = getLocationFromId newWorld startLocation
