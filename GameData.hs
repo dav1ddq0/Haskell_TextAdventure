@@ -224,110 +224,6 @@ azukiarai = Location {
 
 
 
-commonActions :: Location
-commonActions= Location{
-    locationId ="default",
-    locationDescription = "",
-    locationInteractions =
-        [
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["jump"]],
-                interactionActions =[
-                    InteractionAction {
-                        actionCondition = GameTrue,
-                        actionDescription  ="You jump up and down in the place",
-                        actionGameActions  = []
-                    }
-                ]
-            },
-
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["view","bag"]],
-                interactionActions =[
-                    InteractionAction {
-                        actionCondition = GameTrue,
-                        actionDescription  = "",
-                        actionGameActions  = [PrintBag]
-                    }
-                ]
-            },
-
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["give me","the", "time"]],
-                interactionActions =[
-                    InteractionAction{
-                        actionCondition = GameTrue,
-                        actionDescription  = ""  ,
-                        actionGameActions  = [GTime]
-                    }
-                ]
-            },
-
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["use","potion"]],
-                interactionActions =[
-                    InteractionAction{
-                        actionCondition = YouAlreadyHaveThisItem "potion",
-                        actionDescription  = "The traveler used a potion"  ,
-                        actionGameActions  = [RemoveItemFromBag "potion", RecLife 60]
-                    },
-                    InteractionAction{
-                        actionCondition = GameNot(YouAlreadyHaveThisItem "potion"),
-                        actionDescription  = "You have no potions left in your bag"  ,
-                        actionGameActions  = []
-                    }
-                ]
-                    
-                
-            },
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["use","energy drink"]],
-                interactionActions =[
-                    InteractionAction{
-                        actionCondition = YouAlreadyHaveThisItem "energy drink",
-                        actionDescription  = "The traveler used a energy drink"  ,
-                        actionGameActions  = [RemoveItemFromBag "energy drink", RecoveryEnergy 60]
-                    },
-                    InteractionAction{
-                        actionCondition = GameNot(YouAlreadyHaveThisItem "energy drink"),
-                        actionDescription  = "You have no energy drink left in your bag"  ,
-                        actionGameActions  = []
-                    }
-                ]
-                    
-                
-            },
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["view","status"]],
-                interactionActions =[
-                    InteractionAction{
-                        actionCondition = GameTrue ,
-                        actionDescription  = ""  ,
-                        actionGameActions  = [Status]
-                    }
-                    
-                ]
-                    
-                
-            },
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["who Iam"]],
-                interactionActions =[
-                    InteractionAction{
-                        actionCondition = GameTrue,
-                        actionDescription  = ""  ,
-                        actionGameActions  = [PName]
-                    }
-                    
-                ]
-                    
-                
-            }
-
-            
-        ]
-}
-
 casentinesi:: Location
 casentinesi =
     Location
@@ -537,15 +433,214 @@ casentinesi =
                 ]
 
             
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["attack", "globlin"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist "Already at greengrass woods")(GameAnd(YouAlreadyHaveThisItem "stormbridge sword")(TagExist "goblin appear")),
+                        actionDescription = "The traveler attacks the globlin with his sword... \n"++
+                        "The goblin dies ...\n. When he dies he drops a bag with various items\n",
+                        actionGameActions  =[RemoveTag "goblin appear",AddTag "There are items on the greengrass floor"]
+                    },
+                    InteractionAction{
+                        actionCondition = GameOr(TagExist "globlin appear")(GameNot (TagExist "Already at greengrass woods")) ,
+                        actionDescription = "There is no one to attack...\n",
+                        actionGameActions  =[]
+                    },
+                    InteractionAction{
+                        actionCondition = GameAnd(TagExist "globlin appear")(GameAnd(TagExist "Already at greengrass woods")(GameNot(YouAlreadyHaveThisItem "stormbridge sword"))),
+                        actionDescription = "You have nothing to attack with.\n The globin laughs and hits you black blood...\n",
+                        actionGameActions  =[RDamage 50]
+                    }
+                    
+                    
+                ]
+
+            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["take", "items"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist  "There are items on the greengrass floor") (TagExist "Already at greengrass woods"),
+                        actionDescription = "You have taken the following items:...\n"++
+                        "2potions,1 energy drink and the the ancestral *Teleport Exodar*",
+                        actionGameActions  =[RemoveTag "There are items on the greengrass floor", AddItemToBag Potion, AddItemToBag Potion, AddItemToBag "energy drink", 
+                        AddItemToBag "teleport exodar"]
+                    },
+                    InteractionAction{
+                        actionCondition = GameOr (GameNot(TagExist "Already at greengrass woods")) (TagExist "There are items on the greengrass floor"),
+                        actionDescription = "There is nothing to take...\n",
+                        actionGameActions  =[]
+                    }
+                    
+                ]
+
+            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["activate", "teleport"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist "Already at the blood portal") (YouAlreadyHaveThisItem "activate"),
+                        actionDescription = "Suddenly a sphere of energy opens that transports towards the inhospitable Night's dawn",
+                        actionGameActions  =[AddTag  "sphere open"]
+                    },
+                    InteractionAction{
+                        actionCondition = GameOr (GameNot(TagExist "Already at the blood portal")) (GameNot (YouAlreadyHaveThisItem "teleport exodar")),
+                        actionDescription = "What are you trying to do? There is nothing to activate",
+                        actionGameActions  =[]
+                    }
+                    
+                ]
+
+            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["enter", "the" ,"sphere"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist "Already at the blood portal") (TagExist "sphere open"),
+                        actionDescription = "You have entered the sphere of transportation ...A new destination awaits you",
+                        actionGameActions  =[RemoveTag "sphere open",RemoveTag "Already at the blood portal",NextLocation "Night's dawn"]
+                    },
+                    InteractionAction{
+                        actionCondition = GameOr (GameNot(TagExist "Already at the blood portal")) (GameNot (YouAlreadyHaveThisItem "teleport exodar")),
+                        actionDescription = "What are you trying to do? There is nothing to activate",
+                        actionGameActions  =[]
+                    }
+                    
+                ]
+
+            
             }
+
+
             
         
             
         ]
     }
 
+nightsDawn :: Location
+nightsDawn= Location{
+    locationId ="Night's dawn",
+    locationDescription = "",
+    locationInteractions =[
 
+    ]
+}
+commonActions :: Location
+commonActions= Location{
+    locationId ="default",
+    locationDescription = "",
+    locationInteractions =
+        [
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["jump"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameTrue,
+                        actionDescription  ="You jump up and down in the place",
+                        actionGameActions  = []
+                    }
+                ]
+            },
 
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["view","bag"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameTrue,
+                        actionDescription  = "",
+                        actionGameActions  = [PrintBag]
+                    }
+                ]
+            },
+
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["give me","the", "time"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameTrue,
+                        actionDescription  = ""  ,
+                        actionGameActions  = [GTime]
+                    }
+                ]
+            },
+
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["use","potion"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = YouAlreadyHaveThisItem "potion",
+                        actionDescription  = "The traveler used a potion"  ,
+                        actionGameActions  = [RemoveItemFromBag "potion", RecLife 60]
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "potion"),
+                        actionDescription  = "You have no potions left in your bag"  ,
+                        actionGameActions  = []
+                    }
+                ]
+                    
+                
+            },
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["use","energy drink"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = YouAlreadyHaveThisItem "energy drink",
+                        actionDescription  = "The traveler used a energy drink"  ,
+                        actionGameActions  = [RemoveItemFromBag "energy drink", RecoveryEnergy 60]
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "energy drink"),
+                        actionDescription  = "You have no energy drink left in your bag"  ,
+                        actionGameActions  = []
+                    }
+                ]
+                    
+                
+            },
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["view","status"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameTrue ,
+                        actionDescription  = ""  ,
+                        actionGameActions  = [Status]
+                    }
+                    
+                ]
+                    
+                
+            },
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["who Iam"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameTrue,
+                        actionDescription  = ""  ,
+                        actionGameActions  = [PName]
+                    }
+                    
+                ]
+                    
+                
+            }
+
+            
+        ]
+}
+
+-- Game initializations
+-- ------------------------------------------------------------------------------------
 createWorld :: Data.Map.Map String Location-> [String] -> Location -> Player  -> World
 createWorld locations ends defaulRoom player= 
     World{locations = locations,
@@ -555,7 +650,7 @@ createWorld locations ends defaulRoom player=
     communActions = defaulRoom
     }
 
--- Inicializacions
+
 -- -----------------------------------------------------------------
 gameWorld :: Player -> World
 gameWorld = createWorld  rooms ends  commonActions     
@@ -580,4 +675,4 @@ createPlayer name  =
 -- ----------------------------------------------------------------
 
 locationsMap :: (Map [Char] Location , [[Char]])
-locationsMap = (Data.Map.fromList [("azukiarai",azukiarai),("casentinesi", casentinesi)], ["todavia"])
+locationsMap = (Data.Map.fromList [("azukiarai",azukiarai),("casentinesi", casentinesi), ("Night's dawn", nightsDawn)], ["todavia"])
