@@ -34,7 +34,6 @@ nouns = [
     Noun "south" ["south"],
     Noun "east" ["east"],
     Noun "key" ["key"],
-    Noun "door" ["door"],
     Noun "bag" ["bag"],
     Noun "rhydon drill" ["rhydon drill"],
     Noun "magic stick" ["magic stick"],
@@ -45,6 +44,7 @@ nouns = [
     Noun "cave" ["cave"],
     Noun "status" ["status"],
     Noun "potion" ["potion"],
+    Noun "blood portal" ["blood portal"],
     Noun "Xerneas spectrum" ["Xerneas spectrum"],
     Noun "[rhydon drill, magic stick]" ["[rhydon drill, magic stick]","[magic stick, rhydon drill]"]
     ]
@@ -235,7 +235,7 @@ commonActions= Location{
                     InteractionAction {
                         actionCondition = GameTrue,
                         actionDescription  ="You jump up and down in the place",
-                        actionGameActions  = [RDamage 100]
+                        actionGameActions  = []
                     }
                 ]
             },
@@ -319,7 +319,46 @@ casentinesi =
                         actionCondition = TagExist  "Already at the altar",
                         actionDescription = "I'm here now\n", 
                         actionGameActions  = []
+                    },
+
+                    InteractionAction{
+                        actionCondition = LowHealth,
+                        actionDescription = "Can't get up...\n", 
+                        actionGameActions  = []
                     }
+
+
+                ]
+
+            
+            },
+
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["take", "stormbridge sword"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd(GameNot(YouAlreadyHaveThisItem "stormbridge sword"))(TagExist  "Already at the altar"),
+                        actionDescription = "stormbridge sword was added to the bag\n", 
+                        actionGameActions  =[AddItemToBag "stormbridge sword"]
+                    },
+
+                    InteractionAction{
+                        actionCondition = GameAnd(YouAlreadyHaveThisItem "stormbridge sword")(TagExist  "Already at the altar"),
+                        actionDescription = "This object has already been taken\n", 
+                        actionGameActions  = []
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(TagExist  "Already at the altar"),
+                        actionDescription = "There is no object with that name here\n", 
+                        actionGameActions  = []
+                    },
+                    InteractionAction{
+                        actionCondition = LowHealth,
+                        actionDescription = "Can't get up...\n", 
+                        actionGameActions  = []
+                    }
+
 
                 ]
 
@@ -347,20 +386,47 @@ casentinesi =
             
             },
             LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["speak", "with","Blood Death Knight"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist  "Already at the altar") (GameNot (YouAlreadyHaveThisItem "stormbridge sword")),
+                        actionDescription = "Near the altar there is a mound with a mysterious sword called the stormbridge sword.", 
+                        actionGameActions  =[]
+                    },
+
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist  "Already at the altar") (YouAlreadyHaveThisItem "stormbridge sword"),
+                        actionDescription = "I don't see anything relevant", 
+                        actionGameActions  = []
+                    }
+
+                ]
+
+            
+            },
+            LocationInteraction{
                 interactionSentences = [getMeaningfulSentences ["go to", "blood portal"]],
                 
                 interactionActions =[
                     InteractionAction{
                         actionCondition = GameNot(TagExist "Already at the blood portal") ,
                         actionDescription = "The traveler walked to the blood portal...\n",
-                        actionGameActions  =[]
+                        actionGameActions  =[RemoveTag "Already at the altar", AddTag "Already at the blood portal"]
                     },
                     InteractionAction{
-                        actionCondition = GameNot(TagExist "molotov exploted") ,
+                        actionCondition = GameAnd (GameNot(TagExist "Already at the blood portal")) (GameNot(TagExist "molotov exploted")),
                         actionDescription = "A strange sound is heard when suddenly ...\n"++"A mysterious skull-busting molotov cocktail explodes\nBUMM\n\n"++
                         "The traveler falls to the ground as a result of the impact and is seriously injured.\n Can't get up...\n"++
-                        "", 
+                        "A strange fire goblin appears and steals the exodar teleport\nYou still can't move", 
                         actionGameActions  = [RDamage 80,AddTag "molotov exploted"]
+                        
+                        
+                    },
+                    InteractionAction{
+                        actionCondition = GameAnd (GameNot(TagExist "Already at the blood portal")) (TagExist "molotov exploted"),
+                        actionDescription = "Remains of the explosion can be seen near the portal\n", 
+                        actionGameActions  = []
                         
                         
                     }
