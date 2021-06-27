@@ -43,6 +43,8 @@ nouns = [
     Noun "big rock" ["big rock"],
     Noun "mantra fusion" ["mantra fusion"],
     Noun "cave" ["cave"],
+    Noun "status" ["status"],
+    Noun "potion" ["potion"],
     Noun "Xerneas spectrum" ["Xerneas spectrum"],
     Noun "[rhydon drill, magic stick]" ["[rhydon drill, magic stick]","[magic stick, rhydon drill]"]
     ]
@@ -233,7 +235,7 @@ commonActions= Location{
                     InteractionAction {
                         actionCondition = GameTrue,
                         actionDescription  ="You jump up and down in the place",
-                        actionGameActions  = []
+                        actionGameActions  = [RDamage 100]
                     }
                 ]
             },
@@ -258,7 +260,39 @@ commonActions= Location{
                         actionGameActions  = [GTime]
                     }
                 ]
+            },
+
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["use","potion"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = YouAlreadyHaveThisItem "potion",
+                        actionDescription  = "The traveler used a potion"  ,
+                        actionGameActions  = [RemoveItemFromBag "potion", RecLife 60]
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "potion"),
+                        actionDescription  = "You have no potions left in your bag"  ,
+                        actionGameActions  = []
+                    }
+                ]
+                    
+                
+            },
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["view","status"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameTrue ,
+                        actionDescription  = ""  ,
+                        actionGameActions  = [Status]
+                    }
+                    
+                ]
+                    
+                
             }
+
             
         ]
 }
@@ -271,7 +305,78 @@ casentinesi =
         locationDescription = "*CASENTINESI BLOOD FOREST*\nYou have entered the bloody forest of Casentinesi " ++ 
         "where the trees feed on the blood of the dead ...",
         locationInteractions = [
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["go to", "Altar of Elders Darkfire"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameNot (TagExist  "Already at the altar"),
+                        actionDescription = "The traveler walked to the altar of elders darkfire", 
+                        actionGameActions  =[AddTag  "Already at the altar"]
+                    },
 
+                    InteractionAction{
+                        actionCondition = TagExist  "Already at the altar",
+                        actionDescription = "I'm here now\n", 
+                        actionGameActions  = []
+                    }
+
+                ]
+
+            
+            },
+
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["look", "around"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist  "Already at the altar") (GameNot (YouAlreadyHaveThisItem "stormbridge sword")),
+                        actionDescription = "Near the altar there is a mound with a mysterious sword called the stormbridge sword.", 
+                        actionGameActions  =[]
+                    },
+
+                    InteractionAction{
+                        actionCondition = GameAnd (TagExist  "Already at the altar") (YouAlreadyHaveThisItem "stormbridge sword"),
+                        actionDescription = "I don't see anything relevant", 
+                        actionGameActions  = []
+                    }
+
+                ]
+
+            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["go to", "blood portal"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameNot(TagExist "Already at the blood portal") ,
+                        actionDescription = "The traveler walked to the blood portal...\n",
+                        actionGameActions  =[]
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(TagExist "molotov exploted") ,
+                        actionDescription = "A strange sound is heard when suddenly ...\n"++"A mysterious skull-busting molotov cocktail explodes\nBUMM\n\n"++
+                        "The traveler falls to the ground as a result of the impact and is seriously injured.\n Can't get up...\n"++
+                        "", 
+                        actionGameActions  = [RDamage 80,AddTag "molotov exploted"]
+                        
+                        
+                    }
+                    -- InteractionAction{
+                    --     actionCondition = GameNot(TagExist "Already at the blood portal") ,
+                    --     actionDescription = "The traveler walked to the blood portal", 
+                    --     actionGameActions  =[]
+                    -- },
+                    
+                ]
+
+            
+            }
+            
+        
+            
         ]
     }
 
@@ -305,7 +410,7 @@ createPlayer name  =
         playerName = name,
         playerLife = 100,
         playerMagic =100,
-        bag= ["pocion"]
+        bag= ["potion"]
     }
 
 -- ----------------------------------------------------------------

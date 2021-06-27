@@ -51,7 +51,7 @@ updateAdventure (Just (world, locationId))=do
 
 
 goToAdventure :: Maybe  (World, String) -> IO (Maybe  (World, String))
-goToAdventure Nothing = putStr "Thanks for playing" >> hFlush stdout >> return Nothing
+goToAdventure Nothing = putStr "****Thanks for playing****\n" >> hFlush stdout >> return Nothing
 goToAdventure (Just (world,locationId))  = updateAdventure (Just (world,locationId))
 
 

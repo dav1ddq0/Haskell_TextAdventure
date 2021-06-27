@@ -15,13 +15,18 @@ data GameAction     =  AddItemToBag String|
                     RemoveTag String|
                     GTime |
                     Hit String|
-                    PhysicAttack String|
-                    MagicAttack String|
+                    RDamage Int|
+                    RecLife Int |
+                    Status |
                     NextLocation String deriving (Eq, Show)
 
 data GameCondition = YouAlreadyHaveThisItem String |
                     ThisLocation String|
                     TagExist String|
+                    LowHealth |
+                    LowEnergy |
+                    FullHealth|
+                    YouHaveDied|
                     GameTrue |
                     GameFalse |
                     GameNot GameCondition|

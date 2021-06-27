@@ -24,6 +24,18 @@ evalCondition (TagExist tag) World {tags = gameTags} _
 evalCondition (ThisLocation locationId) _ Location{locationId =thisId} 
     = locationId == thisId
 
+evalCondition LowHealth World{player=Player{playerLife = thisLife}} _ 
+    = thisLife < 20
+
+evalCondition YouHaveDied  World{player=Player{playerLife = thisLife}} _ 
+    = thisLife == 0
+
+evalCondition LowEnergy World{player=Player{playerMagic = thisMagic}} _ 
+    = thisMagic == 0
+
+evalCondition FullHealth  World{player=Player{playerLife  = thisLife}} _ 
+    =  thisLife == 100
+
 evalCondition (GameNot condition) world room 
     = not (evalCondition condition world room) 
 evalCondition (GameOr condition1 condition2) world room 
@@ -66,9 +78,14 @@ exeStageAction (InteractionAction{
     = do
         printDescription thisDescription
         outEx <-exeGameAction thisGameActions world locationId
-        newRoomId <- getRoomIdFromMaybeT outEx
-        newWorld <- getWorldFromMaybe outEx
-        exeStageAction otherStageActions newWorld newRoomId
+        if outEx == Nothing 
+            then 
+                return Nothing
+        else
+            do
+            newRoomId <- getRoomIdFromMaybeT outEx
+            newWorld <- getWorldFromMaybe outEx
+            exeStageAction otherStageActions newWorld newRoomId
         
 -- ---------------------------------------------------------------------------------
 
@@ -121,8 +138,21 @@ removeTag :: Eq a => [a] -> a -> [a]
 removeTag tags tag = filter (/= tag)  tags
 
 -- -------------------------------------------------------------------
+-- Life Actions
+-- -------------------------------------------------------------------
+updateLife :: (Ord p, Num p) => p -> p -> p
+updateLife damage life | (life - damage) < 0 = 0
+                        | otherwise = life - damage
 
+recoveryLife :: (Ord p, Num p) => p -> p -> p
+recoveryLife val life | (life + val) > 100 = 100
+                    | otherwise  = life + val
+-- --------------------------------------------------------------------
+-- Status of the Player:
 
+printPlayerStatus :: (Show a1, Show a2) => [Char] -> a1 -> a2 -> IO ()
+printPlayerStatus name life magic =
+    putStr ("Player Status \nNAME: " ++ name ++ "\nLIFE: " ++ show life ++ "\nMAGIC: "++ show magic ++ "\n") 
 
 exeGameAction :: [GameAction] -> World -> String -> IO (Maybe (World, String))
 exeGameAction [] world locationId  = 
@@ -235,10 +265,77 @@ exeGameAction (NextLocation newLocationId: otherGameActions)
             printLocationDescription (getLocationFromId world newLocationId)
             return (Just (world,newLocationId))
 
+exeGameAction (RDamage damage: otherGameActions) 
+    world@World{locations = thisLocations,
+        player =Player{
+            playerName = thisPlayerName,
+            playerLife = thisPlayerLife,
+            playerMagic = thisPlayerMagic,
+            bag = thisBag
+        },
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        let newLife = updateLife thisPlayerLife damage
+        if newLife == 0 
+            then do
+                printRunOutOfLife
+                return Nothing
+        else
+            exeGameAction otherGameActions (World{
+            locations = thisLocations,
+            player = (Player{playerName = thisPlayerName,playerLife = newLife,playerMagic = thisPlayerMagic,bag= thisBag}),
+            tags = thisTags,
+            endGames = thisEnds,
+            communActions = thisDefault}) locationId
+        
+
+exeGameAction (RecLife val: otherGameActions) 
+    world@World{locations = thisLocations,
+        player =Player{
+            playerName = thisPlayerName,
+            playerLife = thisPlayerLife,
+            playerMagic = thisPlayerMagic,
+            bag = thisBag
+        },
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        let newLife = recoveryLife val thisPlayerLife
+        exeGameAction otherGameActions (World{
+        locations = thisLocations,
+        player = (Player{playerName = thisPlayerName,playerLife = newLife,playerMagic = thisPlayerMagic,bag= thisBag}),
+        tags = thisTags,
+        endGames = thisEnds,
+        communActions = thisDefault}) locationId
+
+
+exeGameAction (Status : otherGameActions) 
+    world@World{locations = thisLocations,
+        player =Player{
+            playerName = thisPlayerName,
+            playerLife = thisPlayerLife,
+            playerMagic = thisPlayerMagic,
+            bag = thisBag
+        },
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        printPlayerStatus thisPlayerName thisPlayerLife thisPlayerMagic
+        exeGameAction otherGameActions world locationId 
+        
 
 
 -- exhaustic pattern mathing
 exeGameAction _ _ _ = return Nothing 
+
+
 
 
 

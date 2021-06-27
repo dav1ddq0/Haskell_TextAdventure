@@ -34,3 +34,10 @@ getPairs a b = (,) <$> a <*> b
 textSplit :: [Char] -> [[Char]]
 textSplit = splitOneOf [' ', '\t']  
 -- -----------------------------------------------------------------------------------
+
+
+
+-- -----------------------------------------------------------------------------------
+printRunOutOfLife :: IO ()
+printRunOutOfLife = 
+    putStrLn "You have run out of life.\n Game Over"
