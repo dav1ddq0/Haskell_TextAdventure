@@ -24,7 +24,8 @@ verbs = [
     Verb "go to" ["go to"],
     Verb "use" ["use"],
     Verb "break" ["break"],
-    Verb "leave" ["leave"]
+    Verb "leave" ["leave"],
+    Verb "who Iam"["who Iam","who iam"]
     ]
 
 nouns :: [Token]
@@ -280,12 +281,42 @@ commonActions= Location{
                 
             },
             LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["use","energy drink"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = YouAlreadyHaveThisItem "energy drink",
+                        actionDescription  = "The traveler used a energy drink"  ,
+                        actionGameActions  = [RemoveItemFromBag "energy drink", RecoveryEnergy 60]
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "energy drink"),
+                        actionDescription  = "You have no energy drink left in your bag"  ,
+                        actionGameActions  = []
+                    }
+                ]
+                    
+                
+            },
+            LocationInteraction {
                 interactionSentences = [getMeaningfulSentences ["view","status"]],
                 interactionActions =[
                     InteractionAction{
                         actionCondition = GameTrue ,
                         actionDescription  = ""  ,
                         actionGameActions  = [Status]
+                    }
+                    
+                ]
+                    
+                
+            },
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["who Iam"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameTrue,
+                        actionDescription  = ""  ,
+                        actionGameActions  = [PName]
                     }
                     
                 ]
@@ -371,13 +402,20 @@ casentinesi =
                 interactionActions =[
                     InteractionAction{
                         actionCondition = GameAnd (TagExist  "Already at the altar") (GameNot (YouAlreadyHaveThisItem "stormbridge sword")),
-                        actionDescription = "Near the altar there is a mound with a mysterious sword called the stormbridge sword.", 
+                        actionDescription = "Near the altar  there is a mound with a mysterious sword called the stormbridge sword.", 
                         actionGameActions  =[]
                     },
 
                     InteractionAction{
-                        actionCondition = GameAnd (TagExist  "Already at the altar") (YouAlreadyHaveThisItem "stormbridge sword"),
-                        actionDescription = "I don't see anything relevant", 
+                        actionCondition = TagExist  "Already at the altar",
+                        actionDescription = "There is a mysterious knight named Blood Death Knight. Maybe you can talk to him", 
+                        actionGameActions  = []
+                    },
+                    InteractionAction{
+                        actionCondition = GameAnd (GameNot(TagExist  "Already at the altar")) (GameNot (TagExist "Already at the blood portal")),
+                        actionDescription = "Nearby there is a mysterious altar called Altar of Elders Darkfire\n"++
+                        "Nearby is a mysterious portal called Blood Portal\n"++ "On the floor there are some items that look like potions.\n You can write take items to collect them"++
+                        "", 
                         actionGameActions  = []
                     }
 
@@ -390,14 +428,20 @@ casentinesi =
                 
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameAnd (TagExist  "Already at the altar") (GameNot (YouAlreadyHaveThisItem "stormbridge sword")),
-                        actionDescription = "Near the altar there is a mound with a mysterious sword called the stormbridge sword.", 
-                        actionGameActions  =[]
+                        actionCondition = GameAnd (TagExist  "Already at the altar") (GameNot (TagExist "You already talked to the knight")),
+                        actionDescription = "Welcome young traveler.\n I give you the blessing of a new element the fire ...\n" ++
+                        "You got the fireball power", 
+                        actionGameActions  =[AddTag "fireball",AddTag"You already talked to the knight"]
                     },
 
                     InteractionAction{
-                        actionCondition = GameAnd (TagExist  "Already at the altar") (YouAlreadyHaveThisItem "stormbridge sword"),
-                        actionDescription = "I don't see anything relevant", 
+                        actionCondition = GameAnd (TagExist  "Already at the altar") (TagExist "You already talked to the knight"),
+                        actionDescription = "Use this valiant traveling power well. It will help you clear some areas", 
+                        actionGameActions  = []
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot (TagExist  "Already at the altar"),
+                        actionDescription = "No one to talk to", 
                         actionGameActions  = []
                     }
 
@@ -412,7 +456,7 @@ casentinesi =
                     InteractionAction{
                         actionCondition = GameNot(TagExist "Already at the blood portal") ,
                         actionDescription = "The traveler walked to the blood portal...\n",
-                        actionGameActions  =[RemoveTag "Already at the altar", AddTag "Already at the blood portal"]
+                        actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the greengrass woods", AddTag "Already at the blood portal"]
                     },
                     InteractionAction{
                         actionCondition = GameAnd (GameNot(TagExist "Already at the blood portal")) (GameNot(TagExist "molotov exploted")),
@@ -435,6 +479,60 @@ casentinesi =
                     --     actionDescription = "The traveler walked to the blood portal", 
                     --     actionGameActions  =[]
                     -- },
+                    
+                ]
+
+            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["go to", "greengrass woods"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameNot(TagExist "Already at greengrass woods") ,
+                        actionDescription = "The traveler walked to the greengrass woods...\n",
+                        actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the blood portal", AddTag "Already at the greengrass woods"]
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(TagExist "clear grass") ,
+                        actionDescription = "You can hardly see anything, the grass covers everything...\n",
+                        actionGameActions  =[]
+                    }
+                    
+                ]
+
+            
+            },
+            LocationInteraction{
+                interactionSentences = [getMeaningfulSentences ["use", "fireball"]],
+                
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameAnd(GameAnd(TagExist "Already at greengrass woods")(GameNot(TagExist "clear grass"))) (TagExist "fireball power") ,
+                        actionDescription = "A great ball of fire was shot\n",
+                        actionGameActions  =[AddTag "clear glass"]
+                    },
+                    InteractionAction{
+                        actionCondition = GameAnd(TagExist "Already at greengrass woods")(GameNot(TagExist "clear grass")) ,
+                        actionDescription = "You can hardly see anything, the grass covers everything...\n"++
+                        "Suddenly the same goblin that had stolen the teleport appears\n",
+                        actionGameActions  =[AddTag "clear grass",AddTag "goblin appear"]
+                    },
+                    InteractionAction{
+                        actionCondition = GameAnd(TagExist "Already at greengrass woods")(TagExist "clear grass") ,
+                        actionDescription = "The grass has already been cleared, it is not necessary to use it\n",
+                        actionGameActions  =[]
+                    },
+                    InteractionAction{
+                        actionCondition = GameAnd(TagExist "Already at greengrass woods")(TagExist "clear grass") ,
+                        actionDescription = "The grass has already been cleared, it is not necessary to use it\n",
+                        actionGameActions  =[]
+                    },
+                    InteractionAction{
+                        actionCondition = GameNot(TagExist "Already at greengrass woods"),
+                        actionDescription = "You shouldn't use that power here\n",
+                        actionGameActions  =[]
+                    }
                     
                 ]
 
@@ -476,7 +574,7 @@ createPlayer name  =
         playerName = name,
         playerLife = 100,
         playerMagic =100,
-        bag= ["potion"]
+        bag= ["potion", "potion","energy drink"]
     }
 
 -- ----------------------------------------------------------------

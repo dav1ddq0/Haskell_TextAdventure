@@ -100,10 +100,14 @@ addItemToBagAction items newItem
     | otherwise = items ++ [newItem]
 
 -- Remove item from the player bag
-removeItemFromBagAction :: Eq a => [a] -> a -> [a]
-removeItemFromBagAction items itemToRemove
-    = filter (/= itemToRemove)  items
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- Remove only the first occurrence of the item if it exists
 
+removeItemFromBagAction :: Eq a => [a] -> a -> [a]
+removeItemFromBagAction [] itemToRemove = []
+removeItemFromBagAction (item :otherItems) itemToRemove
+    | item == itemToRemove = otherItems
+    | otherwise = item:removeItemFromBagAction otherItems itemToRemove
 -- Print current player bag
 
 printBag :: Bag -> IO ()
@@ -148,12 +152,29 @@ recoveryLife :: (Ord p, Num p) => p -> p -> p
 recoveryLife val life | (life + val) > 100 = 100
                     | otherwise  = life + val
 -- --------------------------------------------------------------------
--- Status of the Player:
+-- Magic Actions
+updateMagic :: (Ord p, Num p) => p -> p -> p
+updateMagic less magic | (magic - less) < 0 = 0
+                        |otherwise = magic - less
+
+recoveryMagic :: (Ord p, Num p) => p -> p -> p
+recoveryMagic val magic | (magic + val) > 100 = 100
+                        | otherwise = magic + val
+-- --------------------------------------------------------------------
+-- Print Status of the Player:
 
 printPlayerStatus :: (Show a1, Show a2) => [Char] -> a1 -> a2 -> IO ()
 printPlayerStatus name life magic =
     putStr ("Player Status \nNAME: " ++ name ++ "\nLIFE: " ++ show life ++ "\nMAGIC: "++ show magic ++ "\n") 
+-- ---------------------------------------------------------------------
+-- Print your name
 
+printPlayerName :: String -> IO ()
+printPlayerName  =
+    putStrLn 
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- Execute all the game actions of the interaction action what matched
+-- -----------------------------------------------------------------------------
 exeGameAction :: [GameAction] -> World -> String -> IO (Maybe (World, String))
 exeGameAction [] world locationId  = 
     return (Just(world, locationId))
@@ -313,6 +334,47 @@ exeGameAction (RecLife val: otherGameActions)
         endGames = thisEnds,
         communActions = thisDefault}) locationId
 
+exeGameAction (WasteEnergy energy: otherGameActions) 
+    world@World{locations = thisLocations,
+        player =Player{
+            playerName = thisPlayerName,
+            playerLife = thisPlayerLife,
+            playerMagic = thisPlayerMagic,
+            bag = thisBag
+        },
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        let newMagic = updateMagic energy thisPlayerMagic
+        exeGameAction otherGameActions (World{
+        locations = thisLocations,
+        player = (Player{playerName = thisPlayerName,playerLife = thisPlayerLife, playerMagic = newMagic, bag= thisBag}),
+        tags = thisTags,
+        endGames = thisEnds,
+        communActions = thisDefault}) locationId
+
+exeGameAction (RecoveryEnergy energy: otherGameActions) 
+    world@World{locations = thisLocations,
+        player =Player{
+            playerName = thisPlayerName,
+            playerLife = thisPlayerLife,
+            playerMagic = thisPlayerMagic,
+            bag = thisBag
+        },
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        let newMagic = recoveryMagic energy thisPlayerMagic
+        exeGameAction otherGameActions (World{
+        locations = thisLocations,
+        player = (Player{playerName = thisPlayerName,playerLife = thisPlayerLife, playerMagic = newMagic, bag= thisBag}),
+        tags = thisTags,
+        endGames = thisEnds,
+        communActions = thisDefault}) locationId
 
 exeGameAction (Status : otherGameActions) 
     world@World{locations = thisLocations,
@@ -329,13 +391,28 @@ exeGameAction (Status : otherGameActions)
     = do 
         printPlayerStatus thisPlayerName thisPlayerLife thisPlayerMagic
         exeGameAction otherGameActions world locationId 
-        
+
+exeGameAction (PName  : otherGameActions) 
+    world@World{locations = thisLocations,
+        player =Player{
+            playerName = thisPlayerName,
+            playerLife = thisPlayerLife,
+            playerMagic = thisPlayerMagic,
+            bag = thisBag
+        },
+        tags = thisTags,
+        endGames =thisEnds,
+        communActions = thisDefault}
+        locationId
+    = do 
+        printPlayerName thisPlayerName
+        exeGameAction otherGameActions world locationId 
 
 
 -- exhaustic pattern mathing
 exeGameAction _ _ _ = return Nothing 
 
-
+-- ------------------------------------------------------------------------------
 
 
 

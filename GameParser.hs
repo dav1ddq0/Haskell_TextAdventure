@@ -1,7 +1,8 @@
 module GameParser where
 import GameLexer
 import Data.List
-
+import Data.Char 
+import GameUtils
 data Sentence = NullSentence|
                 Phrase Token|
                 SimpleSentence Token Token |
@@ -99,7 +100,7 @@ meaningfulSentence _ _ _ _ = NullSentence
 
 
 findVerb :: Foldable t => String -> t Token -> Maybe Token
-findVerb verb  = Data.List.find (\(Verb x _) -> x== verb) 
+findVerb verb  = Data.List.find (\(Verb x _) -> (textToLower x)== (textToLower verb)) 
 
 
 searchVerb :: [Token] -> String -> [Token]
@@ -111,7 +112,7 @@ searchVerb verbs verb = let finded = findVerb verb verbs
 
 
 findNoun :: Foldable t => String -> t Token -> Maybe Token
-findNoun noun = Data.List.find(\(Noun x _) -> x == noun)
+findNoun noun = Data.List.find(\(Noun x _) -> textToLower x == textToLower noun)
 
 searchNoun :: [Token] -> String -> [Token]
 searchNoun nouns noun = let finded = findNoun noun nouns
@@ -121,7 +122,7 @@ searchNoun nouns noun = let finded = findNoun noun nouns
                                 _ -> []
 
 findPreposition :: Foldable t => String -> t Token -> Maybe Token
-findPreposition preposition = Data.List.find(\(Preposition x _) -> x == preposition)
+findPreposition preposition = Data.List.find(\(Preposition x _) -> (textToLower x) == (textToLower  preposition))
 
 searchPreposition :: [Token] -> String -> [Token]
 searchPreposition prepositions preposition = let finded = findPreposition preposition prepositions

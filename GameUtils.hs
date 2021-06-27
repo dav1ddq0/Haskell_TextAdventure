@@ -5,6 +5,7 @@ import Data.Time
 import Data.Time.Clock
 import Data.Time.LocalTime
 import Data.List.Split
+import Data.Char as UChar
 -- devuele la hora actual de la pc en la que se este corriendo el juego
 -------------------------------------------------------------------------------------
 getGameTime :: IO ()
@@ -41,3 +42,9 @@ textSplit = splitOneOf [' ', '\t']
 printRunOutOfLife :: IO ()
 printRunOutOfLife = 
     putStrLn "You have run out of life.\n Game Over"
+
+-- Convert a string wit letter to lowercase
+
+textToLower :: [Char] -> [Char]
+textToLower []  = []
+textToLower (chr:rest) = UChar.toLower chr : textToLower rest
