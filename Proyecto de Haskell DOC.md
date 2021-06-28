@@ -1,14 +1,16 @@
 
 
-Proyecto de Haskell
+### **Proyecto de Haskell**
 
+### **Programación Declarativa**
 
+Integrantes:
 
-David Orlando De Quesada Oliva C311
+### **David Orlando De Quesada Oliva C311**
 
-Javier Dominguez C312
+### **Javier Domínguez C312**
 
-Daniel de la Cruz C311
+### **Daniel de la Cruz C311**
 
 
 
@@ -54,7 +56,178 @@ GameData.hs
 
 
 
-Ejecutar el proyecto:
+en GameModeling.hs está definida la idea general de como decidimos hacer el text adventure
+
+Usando las características que tiene el leguaje haskell para definir nuevos tipos datoso usando records  lo que permite extraer luego el campo que se necesite
+
+Lo más general del juego lo definimos con World :
+
+```
+data World = World{
+    locations :: Data.Map.Map String Location,
+    player :: Player,
+    tags :: Tags,
+    endGames :: [String],
+    communActions :: Location
+}deriving (Show, Eq)
+```
+
+El juego está formado por un conjunto de locations que representa cada escenario del juego. De la forma que está hecho es bastante extensible pues definiendo nuevos locations e interconectándolos con los ya existenten se puede ampliar y añadir nuevas opciones a la historia. Además tiene un jugador, una lista de etiquetas , una listas de finales y un location especial que sirve para definir las acciones generales que se hacen en el juego sin definir en que location esté el jugador actualmente. Las etiquetas son muy útiles pueden sirven para definir que cosas han pasado en el juego como a donde se ha ido  etc, con estás se puede saber  también si el jugador ya consiguió determinado objetivo como hablar con un héroe etc. 
+
+Un jugador está definido como:
+
+```
+data Player = Player {
+    playerName ::String,
+    playerLife :: Int,
+    playerMagic :: Int,
+    bag:: Bag
+
+}deriving(Show,Eq)
+```
+
+ Tiene un nombre se define con el que se escriba en la consola, una vida y magia que inicialmente valen 100 y siempre tienen un valor entre 0 y 100.
+
+El player también posee un inventario en el cual van a estar los items que vaya cogiendo en la travesía
+
+Una location se define:
+
+```
+data Location = Location {
+    locationId :: String,
+    locationDescription :: String,
+    locationInteractions :: [LocationInteraction]
+} deriving(Show,Eq)
+```
+
+Tiene un id , una descripción la cual se imprime en pantalla  y una listas de interacciones las cuales matchearán o no con lo que escriba el usuario
+
+Con el tipo GameCondition definimos todos las posibles condicionales que se usarán en el juego
+
+Esto permite definir cuando 
+
+```
+data GameCondition = YouAlreadyHaveThisItem String |
+                    ThisLocation String|
+                    TagExist String|
+                    LowHealth |
+                    LowEnergy |
+                    FullHealth|
+                    YouHaveDied|
+                    GameTrue |
+                    GameFalse |
+                    GameNot GameCondition|
+                    GameOr GameCondition GameCondition|
+                    GameAnd GameCondition GameCondition deriving (Eq, Show)
+```
+
+Estas condicionales se verfican en `GameProcessing.hs` con el método  evalCondition usando pattern matching
+
+```
+-- Evaluar la condicion para saber si se cumple la interaccion
+-- -------------------------------------------------------------------------------
+evalCondition :: GameCondition -> World -> Location-> Bool
+evalCondition GameTrue _ _  = True 
+evalCondition GameFalse _ _  = False 
+evalCondition (YouAlreadyHaveThisItem item)  
+    World { player = Player{bag = playerBag}} _
+    = item `elem` playerBag
+
+evalCondition (TagExist tag) World {tags = gameTags} _
+    = tag `elem` gameTags
+
+evalCondition (ThisLocation locationId) _ Location{locationId =thisId} 
+    = locationId == thisId
+
+evalCondition LowHealth World{player=Player{playerLife = thisLife}} _ 
+    = thisLife < 20
+
+evalCondition YouHaveDied  World{player=Player{playerLife = thisLife}} _ 
+    = thisLife == 0
+
+evalCondition LowEnergy World{player=Player{playerMagic = thisMagic}} _ 
+    = thisMagic == 0
+
+evalCondition FullHealth  World{player=Player{playerLife  = thisLife}} _ 
+    =  thisLife == 100
+
+evalCondition (GameNot condition) world room 
+    = not (evalCondition condition world room) 
+evalCondition (GameOr condition1 condition2) world room 
+    = evalCondition condition1 world room || evalCondition condition2 world room
+evalCondition (GameAnd condition1 condition2) world room 
+    = evalCondition condition1 world room && evalCondition condition2 world room
+```
+
+Por ejemplo si quiero verificar si ya hablé con Xerneas puedo poner:
+
+```
+GameNot (TagExist  "You already spoke with Xerneas")
+```
+
+Game Condition fue definido haciendo uso de los tipos recursivos por lo que se le puede agregar fácilmente nuevas condicionales para alguna característica nueva que se le quiera agregar al juego lo que lo hace extensible.
+
+
+
+GameAction en GameModeling.hs define todas las acciones del juego como Add Tag que permite a añadir una nueva etiqueta a la lista de etiquetas .
+
+GameAction está definido usando la definición de tipos de datos recursivos
+
+```
+data GameAction     =  AddItemToBag String|
+                    RemoveItemFromBag String |
+                    PrintBag |
+                    AddTag String|
+                    RemoveTag String|
+                    GTime |
+                    Hit String|
+                    RDamage Int|
+                    RecLife Int |
+                    Status |
+                    WasteEnergy Int|
+                    RecoveryEnergy Int|
+                    PName |
+                    Help |
+                    Exit |
+                    NextLocation String deriving (Eq, Show)
+```
+
+Una vez que matchee un InteractionAction se manda a ejecutar cada GameAction definido en este
+
+A GameAction también se le pueden agregar fácilmente nuevas acciones que se quieran a agregar al juego dada su definición.
+
+
+
+Con exeGameAction en GameProcessing.hs ejecutamos cada GameAction de la lista de GameActions que tiene el InteractionAction que matcheó
+
+LocationInteraction  está definido por una listas de Sentence  y una lista de InteractioAction .La lista de Sentence es lo que se compara con la Sentence que devuelve el parseo de lo que se escriba en consola si la Sentence producto de parsear la línea de entrada coincide con algunas de las que tiene la lista entonces esa LocationInteraction matchea y se revisa en la listas de interactionActions cuales se cumplen
+
+```
+data LocationInteraction = LocationInteraction {
+    interactionSentences :: [Sentence],
+    interactionActions :: [InteractionAction] 
+}deriving (Show,Eq)
+```
+
+ InteractionAction 
+
+```
+data InteractionAction = InteractionAction{
+    actionCondition :: GameCondition,
+    actionDescription :: String,
+    actionGameActions :: [GameAction]
+}deriving (Eq, Show)
+```
+
+InteractionAction está formado por un actionCondition que es del tipo GameCondition, un actionDescription que describe lo que se mostraría en pantalla en caso que se cumpla el actionCondition y  una lista de GameAction que se ejecutarán en caso que se cumpla el actionCondition.
+
+
+
+
+
+
+
+**Ejecutar el proyecto:**
 
 
 
@@ -64,7 +237,7 @@ ghci MainGame.hs
 
 <img src="/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/1.png" style="zoom: 80%;" />
 
-Luego 
+Luego  **adventure begin**
 
 ```
 play
