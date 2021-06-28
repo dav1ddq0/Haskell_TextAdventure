@@ -172,6 +172,23 @@ printPlayerStatus name life magic =
 printPlayerName :: String -> IO ()
 printPlayerName  =
     putStrLn 
+
+-- --------------------------------------------------------------------
+printHelp :: IO ()
+printHelp = 
+    putStr ("*HELP*:\n" ++ 
+    "-type <view status> to see the status of the player\n"++
+    "-type <exit> to force exit game\n"++
+    "-type <who Iam> to see playe name\n"++
+    "-type <use potion> to recover the player's life in case you have in the bag\n"++
+    "-type <give me the time> to know the current time\n"++
+    "-type <use energy drink> to recover the player's magic in case you have in the bag\n"++
+    "-type <help> to see this help")
+-- -----------------------------------------------------------------------------------------
+printExit :: IO ()
+printExit =
+    putStrLn "You have forced out of the game\n"
+
 -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 -- Execute all the game actions of the interaction action what matched
 -- -----------------------------------------------------------------------------
@@ -299,7 +316,7 @@ exeGameAction (RDamage damage: otherGameActions)
         communActions = thisDefault}
         locationId
     = do 
-        let newLife = updateLife thisPlayerLife damage
+        let newLife = updateLife damage thisPlayerLife
         if newLife == 0 
             then do
                 printRunOutOfLife
@@ -408,6 +425,18 @@ exeGameAction (PName  : otherGameActions)
         printPlayerName thisPlayerName
         exeGameAction otherGameActions world locationId 
 
+
+exeGameAction (Help  : otherGameActions) 
+    world locationId
+    = do 
+        printHelp
+        exeGameAction otherGameActions world locationId 
+
+exeGameAction (Exit: otherGameActions) 
+    world locationId
+    = do 
+        printExit
+        return Nothing
 
 -- exhaustic pattern mathing
 exeGameAction _ _ _ = return Nothing 

@@ -21,6 +21,8 @@ data GameAction     =  AddItemToBag String|
                     WasteEnergy Int|
                     RecoveryEnergy Int|
                     PName |
+                    Help |
+                    Exit |
                     NextLocation String deriving (Eq, Show)
 
 data GameCondition = YouAlreadyHaveThisItem String |

@@ -14,6 +14,8 @@ intro Player{playerName =thisName}= "\nAt the top of a mountain in Dhaka a desol
 
 verbs :: [Token]
 verbs = [
+    Verb "help" ["help"],
+    Verb "exit" ["exit"],
     Verb "get" ["get", "take"],
     Verb "view" ["view"],
     Verb "jump" ["jump"],
@@ -25,6 +27,7 @@ verbs = [
     Verb "use" ["use"],
     Verb "break" ["break"],
     Verb "leave" ["leave"],
+    Verb "attack" ["attack"],
     Verb "who Iam"["who Iam","who iam"]
     ]
 
@@ -47,6 +50,8 @@ nouns = [
     Noun "potion" ["potion"],
     Noun "blood portal" ["blood portal"],
     Noun "Xerneas spectrum" ["Xerneas spectrum"],
+    Noun "boss" ["boss"],
+    Noun "items"["items"],
     Noun "[rhydon drill, magic stick]" ["[rhydon drill, magic stick]","[magic stick, rhydon drill]"]
     ]
 
@@ -55,7 +60,8 @@ prepositions =[
     Preposition "in" ["in", "inside", "within"],
     Preposition "into" ["into"],
     Preposition "the" ["the"],
-    Preposition "with" ["with"]
+    Preposition "with" ["with"],
+    Preposition "to" ["with"]
     ]
 
 worldWords :: [Token]
@@ -76,18 +82,23 @@ azukiarai = Location {
                 interactionSentences = [getMeaningfulSentences ["look", "around"]],
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameNot (YouAlreadyHaveThisItem "rhydon drill"),
+                        actionCondition = GameAnd(GameNot(TagExist "mantra fusion used"))(GameNot (YouAlreadyHaveThisItem "rhydon drill")),
                         actionDescription = "There is a strange rhydon drill object near the cave mosses.\n",
                         actionGameActions  =[]
                     },
                     InteractionAction{
-                        actionCondition = GameNot (YouAlreadyHaveThisItem "magic stick"),
+                        actionCondition = GameAnd (GameNot(TagExist "mantra fusion used")) (GameNot (YouAlreadyHaveThisItem "magic stick")),
                         actionDescription = "There is a magic stick near the lava river.\n",
                         actionGameActions = []
                     },
                     InteractionAction{
                         actionCondition =  GameNot (TagExist  "rock moved"), 
                         actionDescription = "There is a big rock blocking the exit\n",
+                        actionGameActions  =  []
+                    },
+                    InteractionAction{
+                        actionCondition =  GameTrue, 
+                        actionDescription = "An old spectrum named Xerneas is seen.\n",
                         actionGameActions  =  []
                     },
                     InteractionAction{
@@ -102,7 +113,7 @@ azukiarai = Location {
                 interactionSentences = [getMeaningfulSentences ["get", "rhydon drill"]],
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameNot (YouAlreadyHaveThisItem "rhydon drill"),
+                        actionCondition = GameAnd (GameNot (YouAlreadyHaveThisItem "rhydon drill"))(GameNot(TagExist "mantra fusion used")),
                         actionDescription = "You get rhydon drill item\n",
                         actionGameActions = [AddItemToBag "rhydon drill"]
                     },
@@ -117,7 +128,7 @@ azukiarai = Location {
                 interactionSentences = [getMeaningfulSentences ["get", "magic stick"]],
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameNot (YouAlreadyHaveThisItem "magic stick"),
+                        actionCondition = GameAnd(GameNot (YouAlreadyHaveThisItem "magic stick"))(GameNot(TagExist "mantra fusion used")),
                         actionDescription = "You get magic stick item\n",
                         actionGameActions = [AddItemToBag "magic stick"]
                     },
@@ -169,7 +180,7 @@ azukiarai = Location {
                         (GameAnd (YouAlreadyHaveThisItem "magic stick") (TagExist  "You got mantra fusion")),
                         actionDescription =  "The mantra fusion magic began\n"++
                         "....\n"++ "A strong light has emerged.\n" ++ "You have obtained a new item:\n*rockbreaker*",
-                        actionGameActions  =[AddItemToBag "rockbreaker", RemoveItemFromBag "rhydon drill", RemoveItemFromBag "magic stick"]
+                        actionGameActions  =[AddTag "mantra fusion used",AddItemToBag "rockbreaker", RemoveItemFromBag "rhydon drill", RemoveItemFromBag "magic stick"]
                     }
                 ]
             },
@@ -359,7 +370,7 @@ casentinesi =
                         actionDescription = "A strange sound is heard when suddenly ...\n"++"A mysterious skull-busting molotov cocktail explodes\nBUMM\n\n"++
                         "The traveler falls to the ground as a result of the impact and is seriously injured.\n Can't get up...\n"++
                         "A strange fire goblin appears and steals the exodar teleport\nYou still can't move", 
-                        actionGameActions  = [RDamage 80,AddTag "molotov exploted"]
+                        actionGameActions  = [RDamage 88,AddTag "molotov exploted"]
                         
                         
                     },
@@ -385,8 +396,13 @@ casentinesi =
                 
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameNot(TagExist "Already at greengrass woods") ,
+                        actionCondition = GameAnd (GameNot LowHealth)(GameNot(TagExist "Already at greengrass woods")) ,
                         actionDescription = "The traveler walked to the greengrass woods...\n",
+                        actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the blood portal", AddTag "Already at the greengrass woods"]
+                    },
+                    InteractionAction{
+                        actionCondition = LowHealth,
+                        actionDescription = "You can't move because of the impact\n",
                         actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the blood portal", AddTag "Already at the greengrass woods"]
                     },
                     InteractionAction{
@@ -461,7 +477,7 @@ casentinesi =
             
             },
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["take", "items"]],
+                interactionSentences = [getMeaningfulSentences ["get", "items"]],
                 
                 interactionActions =[
                     InteractionAction{
@@ -552,7 +568,7 @@ nightsDawn= Location{
                 ]
             },
         LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["take", "unknow item"]],
+                interactionSentences = [getMeaningfulSentences ["get", "unknow item"]],
                 interactionActions =[
                     InteractionAction {
                         actionCondition = YouAlreadyHaveThisItem "torch" ,
@@ -715,23 +731,34 @@ nightsDawn= Location{
 }
 
 
+dungeonBoss :: Location
 dungeonBoss= Location{
     locationId ="Xavius",
     locationDescription = "**XAVIUS BOSS***\nTraveler dare to confront me. ha ha.",
     locationInteractions =
         [
             LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["attack boss"]],
+                interactionSentences = [getMeaningfulSentences ["attack", "boss"]],
                 interactionActions =[
                     InteractionAction {
-                        actionCondition = GameAnd(GameAnd(GameNot(TagExist "Second attack"))(GameNot(TagExist "Final attack")))(TagExist "First attack"),
-                        actionDescription  = "Xavius is still on his feet and launches a wildfire attack at you\n",
-                        actionGameActions  = [RDamage 40]
+                        actionCondition = GameAnd(GameNot(TagExist "Second attack"))(TagExist "First attack"),
+                        actionDescription  = "You attacked Xavius with your sword\n"++
+                        "Xavius is still on his feet and launches a wildfire attack at you\n",
+                        actionGameActions  = [RDamage 70, AddTag "Second attack"]
+                    },
+                    InteractionAction {
+                        actionCondition = GameNot(TagExist "First attack"),
+                        actionDescription  = "Attacked Xavius with your sword using the double-edged spin ability\n"++
+                        "Xavius is still standing but more weakened.\nFire spin spear\n",
+                        actionGameActions  = [RDamage 50,AddTag "First attack"]
                     },
                     InteractionAction {
                         actionCondition = TagExist "Second attack",
-                        actionDescription  = "Xavius is still standing but more weakened. Fire spin spear\n",
-                        actionGameActions  = [RDamage 45]
+                        actionDescription  = "You attacked Xavius with the sword the thousand-bladed sword ability.\n" ++
+                    "Congratulations traveler or you have won the challenge\n"++
+                    ".................\n"++
+                    "Game Completed :)\n\n",
+                        actionGameActions  = [NextLocation "finished"]
                     }
 
                 ]
@@ -837,7 +864,34 @@ commonActions= Location{
                 ]
                     
                 
+            },
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["help"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameTrue ,
+                        actionDescription  = ""  ,
+                        actionGameActions  = [Help]
+                    }
+                    
+                ]
+                    
+                
+            },
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["exit"]],
+                interactionActions =[
+                    InteractionAction{
+                        actionCondition = GameTrue ,
+                        actionDescription  = ""  ,
+                        actionGameActions  = [Exit]
+                    }
+                    
+                ]
+                    
+                
             }
+
 
             
         ]
@@ -879,4 +933,4 @@ createPlayer name  =
 -- ----------------------------------------------------------------
 
 locationsMap :: (Map [Char] Location , [[Char]])
-locationsMap = (Data.Map.fromList [("azukiarai",azukiarai),("casentinesi", casentinesi), ("Night's dawn", nightsDawn)], ["todavia"])
+locationsMap = (Data.Map.fromList [("azukiarai",azukiarai),("casentinesi", casentinesi), ("Night's dawn", nightsDawn), ("Xavius", dungeonBoss)], ["finished"])
