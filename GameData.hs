@@ -468,7 +468,7 @@ casentinesi =
                         actionCondition = GameAnd (TagExist  "There are items on the greengrass floor") (TagExist "Already at greengrass woods"),
                         actionDescription = "You have taken the following items:...\n"++
                         "2potions,1 energy drink and the the ancestral *Teleport Exodar*",
-                        actionGameActions  =[RemoveTag "There are items on the greengrass floor", AddItemToBag Potion, AddItemToBag Potion, AddItemToBag "energy drink", 
+                        actionGameActions  =[RemoveTag "There are items on the greengrass floor", AddItemToBag "Potion", AddItemToBag "Potion", AddItemToBag "energy drink", 
                         AddItemToBag "teleport exodar"]
                     },
                     InteractionAction{
@@ -510,8 +510,8 @@ casentinesi =
                         actionGameActions  =[RemoveTag "sphere open",RemoveTag "Already at the blood portal",NextLocation "Night's dawn"]
                     },
                     InteractionAction{
-                        actionCondition = GameOr (GameNot(TagExist "Already at the blood portal")) (GameNot (YouAlreadyHaveThisItem "teleport exodar")),
-                        actionDescription = "What are you trying to do? There is nothing to activate",
+                        actionCondition = GameOr (GameNot(TagExist "Already at the blood portal")) (GameNot (TagExist "sphere open")),
+                        actionDescription = "There is no transportation sphere in sight\n",
                         actionGameActions  =[]
                     }
                     
@@ -530,11 +530,215 @@ casentinesi =
 nightsDawn :: Location
 nightsDawn= Location{
     locationId ="Night's dawn",
-    locationDescription = "",
+    locationDescription = "**NIGHT'S DAWN**\n"++
+    "Where darkness takes over life and ice runs through the landscape.\n" ++
+    "The place is very dark, you can hardly see anything. ...\n" ++
+    "I have stumbled upon something let me catch it.\n",
     locationInteractions =[
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["look", "around"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameNot(TagExist "light on") ,
+                        actionDescription  ="I see almost nothing.\n I only feel a strange object near my foot\n",
+                        actionGameActions  = []
+                    },
+                    InteractionAction {
+                        actionCondition = TagExist "light on",
+                        actionDescription  ="There are three fire containers.\n Maybe you can light them with the torch\n",
+                        actionGameActions  = []
+                    }
+
+                ]
+            },
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["take", "unknow item"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = YouAlreadyHaveThisItem "torch" ,
+                        actionDescription  = "No nothing to catch\n",
+                        actionGameActions  = []
+                    },
+                    InteractionAction {
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "torch"),
+                        actionDescription  ="Ohh a torch.\n The torch was added to the bag\n",
+                        actionGameActions  = [AddItemToBag "torch"]
+                    }
+                    
+                ]
+            },
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["use", "fireball"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameAnd(YouAlreadyHaveThisItem "torch")(GameNot(TagExist "burning torch")) ,
+                        actionDescription  = "You have lit the torch.\n... Now you can see better inside so much darkness\n",
+                        actionGameActions  = [AddTag "light on"]
+                    },
+                    InteractionAction {
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "torch"),
+                        actionDescription  ="There is nothing to set fire\n",
+                        actionGameActions  = []
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container1")(GameNot(TagExist "container1 on")),
+                        actionDescription  ="You used fireball power to light the container1\n",
+                        actionGameActions  = [AddTag "container1 on"]
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container1")(TagExist "container1 on"),
+                        actionDescription  ="This container is already lit\n",
+                        actionGameActions  = []
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container2")(GameAnd(TagExist "container1 on")(GameNot(TagExist "container2 on"))),
+                        actionDescription  ="You used fireball power to light the container2\n",
+                        actionGameActions  = [AddTag "container2 on"]
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container2")(TagExist "container2 on"),
+                        actionDescription  ="This container is already lit\n",
+                        actionGameActions  = []
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(GameAnd(TagExist "Already at fire container2") (GameNot(TagExist "container1 on")))(GameNot(TagExist "container2 on")),
+                        actionDescription  ="Container 2 can only be turned on after Container 1\n",
+                        actionGameActions  = []
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container3")(GameAnd(TagExist "container2 on")(GameNot(TagExist "container3 on"))),
+                        actionDescription  ="You used fireball power to light the container3\n" ++
+                        "The ritual is completed now a strange being emerges ...\n"++
+                        "Gate Guardian Appears\n",
+                        actionGameActions  = [AddTag "container3 on", AddTag "gate guardian"]
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container3")(TagExist "container3 on"),
+                        actionDescription  = "This container is already lit\n",
+                        actionGameActions  = []
+                    },
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container3")(GameAnd(GameNot(TagExist "container3 on"))(TagExist "container2 on")),
+                        actionDescription  = "Container 3 can only be turned on after Container 2\n",
+                        actionGameActions  = []
+                    }
+                    
+                ]
+            },
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["go to", "fire container1"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameNot(TagExist "Already at fire container1"),
+                        actionDescription  = "You have moved to Container 1\n",
+                        actionGameActions  = [AddTag "Already at fire container1",RemoveTag "Already at fire container2",
+                        RemoveTag "Already at fire container3"]
+                    },
+                    InteractionAction {
+                        actionCondition = TagExist "Already at fire container1",
+                        actionDescription  = "You are already in fire container 1\n",
+                        actionGameActions  = []
+                    }
+                    
+                ]
+            },
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["go to", "fire container2"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameNot(TagExist "Already at fire container2"),
+                        actionDescription  = "You have moved to Container 2\n",
+                        actionGameActions  = [AddTag "Already at fire container2",RemoveTag "Already at fire container2",
+                        RemoveTag "Already at fire container3"]
+                    },
+                    InteractionAction {
+                        actionCondition = TagExist "Already at fire container2",
+                        actionDescription  = "You are already in fire container 2\n",
+                        actionGameActions  = []
+                    }
+                    
+                ]
+            },
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["go to", "fire container3"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameNot(TagExist "Already at fire container3") ,
+                        actionDescription  = "You have moved to Container 3\n",
+                        actionGameActions  = [AddTag "Already at fire container3",RemoveTag "Already at fire container1",
+                        RemoveTag "Already at fire container2"]
+                    },
+                    InteractionAction {
+                        actionCondition = TagExist "Already at fire container3",
+                        actionDescription  = "You are already in fire container 3\n",
+                        actionGameActions  = []
+                    }
+                    
+                ]
+            },
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["open", "dungeon gate"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = YouAlreadyHaveThisItem "key" ,
+                        actionDescription  = "You have moved to Container 3\n",
+                        actionGameActions  = [RemoveTag  "Already at fire container3",RemoveTag "Already at fire container1",
+                        RemoveTag "Already at fire container2", NextLocation "bot"]
+                    },
+                    InteractionAction {
+                        actionCondition = TagExist "Already at fire container3",
+                        actionDescription  = "You are already in fire container 3\n",
+                        actionGameActions  = []
+                    }
+                    
+                ]
+        },
+        LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["talk", "to", "the gate guardian"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameAnd(TagExist "Already at fire container3")(TagExist "gate guardian") ,
+                        actionDescription  = "Welcome young traveler behind the door awaits you the final test to defeat the mythical Xavius\n"++
+                        "Here I give you the entry key and a new ice wall power",
+                        actionGameActions  = [AddTag "dungeon entrance",AddTag  "ice wall",AddItemToBag "key"]
+                    },
+                    InteractionAction {
+                        actionCondition = GameNot(GameAnd(TagExist "Already at fire container3")(TagExist "gate guardian")),
+                        actionDescription  = "There is no guardian to talk to\n",
+                        actionGameActions  = []
+                    }
+                    
+                ]
+            }
 
     ]
 }
+
+
+dungeonBoss= Location{
+    locationId ="Xavius",
+    locationDescription = "**XAVIUS BOSS***\nTraveler dare to confront me. ha ha.",
+    locationInteractions =
+        [
+            LocationInteraction {
+                interactionSentences = [getMeaningfulSentences ["attack boss"]],
+                interactionActions =[
+                    InteractionAction {
+                        actionCondition = GameAnd(GameAnd(GameNot(TagExist "Second attack"))(GameNot(TagExist "Final attack")))(TagExist "First attack"),
+                        actionDescription  = "Xavius is still on his feet and launches a wildfire attack at you\n",
+                        actionGameActions  = [RDamage 40]
+                    },
+                    InteractionAction {
+                        actionCondition = TagExist "Second attack",
+                        actionDescription  = "Xavius is still standing but more weakened. Fire spin spear\n",
+                        actionGameActions  = [RDamage 45]
+                    }
+
+                ]
+            }
+        ]
+}
+
 commonActions :: Location
 commonActions= Location{
     locationId ="default",
@@ -638,7 +842,7 @@ commonActions= Location{
             
         ]
 }
-
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 -- Game initializations
 -- ------------------------------------------------------------------------------------
 createWorld :: Data.Map.Map String Location-> [String] -> Location -> Player  -> World
