@@ -95,9 +95,7 @@ exeStageAction (InteractionAction{
 --Bag Possible Actions
 -- Add a new item to player bag
 addItemToBagAction :: Eq a => [a] -> a -> [a]
-addItemToBagAction items newItem
-    | newItem `elem` items = items
-    | otherwise = items ++ [newItem]
+addItemToBagAction items newItem = items ++ [newItem]
 
 -- Remove item from the player bag
 -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++

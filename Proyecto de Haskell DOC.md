@@ -320,7 +320,113 @@ attack goblin
 
 
 
+Recogemos esos items
 
+Pare eso escribimos:
+
+```
+take items
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/37.png)
+
+Revisamos la bolsa:
+
+```
+view bag
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/38.png)
+
+
+
+Una vez obtenido el teleport vamos de nuevo al Blood Portal
+
+```
+go to blood portal
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/39.png)
+
+Ahora tenemos que usar el teleport 
+
+Para eso escribimos:
+
+```
+activate teleport
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/40.png)
+
+Ahora el viajero tienes que entrar a la esfera de transportación 
+
+Para eso escribe:
+
+```
+enter the sphere
+```
+
+
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/41.png)
+
+La esfera transporta al viajero al desolado y oscuro lugar Night's Dawn 
+
+Ahora escribimos `look around` para que nos brinde alguna pista
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/42.png)
+
+Parece ser que hay un extraño objeto cerca 
+
+Para tomar el objeto escribe
+
+```
+take unknow item
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/43.png)
+
+El misterioso objeto parece ser una antorcha
+
+Quizás si la prendes podrás ver mejor en tanta oscuridad
+
+Para encender la antorcha usar el poder fireball
+
+```
+use fireball
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/44.png)
+
+
+
+Ahora si escribimos `look around` podemos ver nuevas pistas:
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/45.png)
+
+Ahora se revelan tres contenedores para encender con fuego que parecen una especie de ritual
+
+Los contenedores de fuego deben encenderse en orden 
+
+Vamos a ir al primero
+
+escribimos:
+
+```
+go to fire container1
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/46.png)
+
+
+
+Ahora encendemos el recipiento escribiendo:
+
+```
+use fireball
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/47.png)
 
 
 
