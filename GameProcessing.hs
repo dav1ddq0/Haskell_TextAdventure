@@ -170,8 +170,8 @@ printPlayerStatus name life magic =
 -- Print your name
 
 printPlayerName :: String -> IO ()
-printPlayerName  =
-    putStrLn 
+printPlayerName name =
+    putStrLn ("Your name is: "++ name)
 
 -- --------------------------------------------------------------------
 printHelp :: IO ()

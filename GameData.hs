@@ -28,7 +28,11 @@ verbs = [
     Verb "break" ["break"],
     Verb "leave" ["leave"],
     Verb "attack" ["attack"],
-    Verb "who Iam"["who Iam","who iam"]
+    Verb "who Iam"["who Iam","who iam","WHO IAM"],
+    Verb "attack" ["attack"],
+    Verb "speak" ["speak"],
+    Verb "activate" ["activate"],
+    Verb "enter" ["enter"]
     ]
 
 nouns :: [Token]
@@ -48,11 +52,18 @@ nouns = [
     Noun "cave" ["cave"],
     Noun "status" ["status"],
     Noun "potion" ["potion"],
-    Noun "blood portal" ["blood portal"],
+    Noun "blood portal" ["blood portal", "Blood Portal"],
     Noun "Xerneas spectrum" ["Xerneas spectrum"],
+    Noun "altar of Elders Darkfire" ["Altar of Elders Darkfire", "altar of Elders Darkfire" ],
     Noun "boss" ["boss"],
     Noun "items"["items"],
-    Noun "[rhydon drill, magic stick]" ["[rhydon drill, magic stick]","[magic stick, rhydon drill]"]
+    Noun "globlin" ["goblin"],
+    Noun "stormbridge sword" ["stormbridge sword"],
+    Noun "Blood Death Knight" ["Blood Death Knight"],
+    Noun "greengrass woods" ["greengrass woods", "Greengrass Woods"],
+    Noun "fireball" ["fireball"],
+    Noun "teleport" ["teleport"],
+    Noun "sphere" ["sphere"]
     ]
 
 prepositions :: [Token]
@@ -92,7 +103,7 @@ azukiarai = Location {
                         actionGameActions = []
                     },
                     InteractionAction{
-                        actionCondition =  GameNot (TagExist  "rock moved"), 
+                        actionCondition =  GameNot (TagExist  "rock removed"), 
                         actionDescription = "There is a big rock blocking the exit\n",
                         actionGameActions  =  []
                     },
@@ -244,17 +255,17 @@ casentinesi =
         "where the trees feed on the blood of the dead ...",
         locationInteractions = [
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["go to", "Altar of Elders Darkfire"]],
+                interactionSentences = [getMeaningfulSentences ["go to", "altar of Elders Darkfire"]],
                 
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameNot (TagExist  "Already at the altar"),
+                        actionCondition = GameAnd(GameNot (TagExist  "Already at the altar"))(GameNot LowHealth),
                         actionDescription = "The traveler walked to the altar of elders darkfire", 
                         actionGameActions  =[AddTag  "Already at the altar"]
                     },
 
                     InteractionAction{
-                        actionCondition = TagExist  "Already at the altar",
+                        actionCondition = GameAnd(TagExist  "Already at the altar")(GameNot LowHealth),
                         actionDescription = "I'm here now\n", 
                         actionGameActions  = []
                     },
@@ -276,18 +287,18 @@ casentinesi =
                 
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameAnd(GameNot(YouAlreadyHaveThisItem "stormbridge sword"))(TagExist  "Already at the altar"),
+                        actionCondition = GameAnd(GameNot(YouAlreadyHaveThisItem "stormbridge sword"))(GameAnd(TagExist  "Already at the altar")(GameNot LowHealth)),
                         actionDescription = "stormbridge sword was added to the bag\n", 
                         actionGameActions  =[AddItemToBag "stormbridge sword"]
                     },
 
                     InteractionAction{
-                        actionCondition = GameAnd(YouAlreadyHaveThisItem "stormbridge sword")(TagExist  "Already at the altar"),
+                        actionCondition = GameAnd(YouAlreadyHaveThisItem "stormbridge sword")(GameAnd(TagExist  "Already at the altar")(GameNot LowHealth)),
                         actionDescription = "This object has already been taken\n", 
                         actionGameActions  = []
                     },
                     InteractionAction{
-                        actionCondition = GameNot(TagExist  "Already at the altar"),
+                        actionCondition = GameAnd (GameNot(TagExist  "Already at the altar"))(GameNot LowHealth),
                         actionDescription = "There is no object with that name here\n", 
                         actionGameActions  = []
                     },
@@ -318,11 +329,14 @@ casentinesi =
                         actionDescription = "There is a mysterious knight named Blood Death Knight. Maybe you can talk to him", 
                         actionGameActions  = []
                     },
+                    
+                    -- Main
                     InteractionAction{
-                        actionCondition = GameAnd (GameNot(TagExist  "Already at the altar")) (GameNot (TagExist "Already at the blood portal")),
+                        actionCondition = GameAnd (GameNot(TagExist "Already at the altar")) (GameAnd(GameNot (TagExist "Already at the blood portal"))
+                        (GameNot (TagExist "Already at the greengrass woods"))),
                         actionDescription = "Nearby there is a mysterious altar called Altar of Elders Darkfire\n"++
-                        "Nearby is a mysterious portal called Blood Portal\n"++ "On the floor there are some items that look like potions.\n You can write take items to collect them"++
-                        "", 
+                        "Nearby is a mysterious portal called Blood Portal\n"++ "Nearby  there is a mysterious woods called Greengrass Woods\n"
+                        , 
                         actionGameActions  = []
                     }
 
@@ -335,21 +349,26 @@ casentinesi =
                 
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameAnd (TagExist  "Already at the altar") (GameNot (TagExist "You already talked to the knight")),
+                        actionCondition = GameAnd (GameAnd(TagExist  "Already at the altar")(GameNot LowHealth)) (GameNot (TagExist "You already talked to the knight")),
                         actionDescription = "Welcome young traveler.\n I give you the blessing of a new element the fire ...\n" ++
                         "You got the fireball power", 
                         actionGameActions  =[AddTag "fireball",AddTag"You already talked to the knight"]
                     },
 
                     InteractionAction{
-                        actionCondition = GameAnd (TagExist  "Already at the altar") (TagExist "You already talked to the knight"),
+                        actionCondition = GameAnd (GameAnd(GameNot LowHealth)(TagExist  "Already at the altar")) (TagExist "You already talked to the knight"),
                         actionDescription = "Use this valiant traveling power well. It will help you clear some areas", 
                         actionGameActions  = []
                     },
                     InteractionAction{
-                        actionCondition = GameNot (TagExist  "Already at the altar"),
+                        actionCondition = GameAnd(GameNot (TagExist  "Already at the altar"))(GameNot LowHealth),
                         actionDescription = "No one to talk to", 
                         actionGameActions  = []
+                    },
+                    InteractionAction{
+                        actionCondition = LowHealth,
+                        actionDescription = "You can't move because of the impact\n",
+                        actionGameActions  =[]
                     }
 
                 ]
@@ -361,9 +380,14 @@ casentinesi =
                 
                 interactionActions =[
                     InteractionAction{
-                        actionCondition = GameNot(TagExist "Already at the blood portal") ,
+                        actionCondition = GameAnd(GameNot(TagExist "Already at the blood portal")) (GameNot LowHealth),
                         actionDescription = "The traveler walked to the blood portal...\n",
                         actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the greengrass woods", AddTag "Already at the blood portal"]
+                    },
+                    InteractionAction{
+                        actionCondition = LowHealth,
+                        actionDescription = "You can't move because of the impact\n",
+                        actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the blood portal", AddTag "Already at the greengrass woods"]
                     },
                     InteractionAction{
                         actionCondition = GameAnd (GameNot(TagExist "Already at the blood portal")) (GameNot(TagExist "molotov exploted")),
@@ -381,11 +405,7 @@ casentinesi =
                         
                         
                     }
-                    -- InteractionAction{
-                    --     actionCondition = GameNot(TagExist "Already at the blood portal") ,
-                    --     actionDescription = "The traveler walked to the blood portal", 
-                    --     actionGameActions  =[]
-                    -- },
+
                     
                 ]
 
@@ -403,10 +423,10 @@ casentinesi =
                     InteractionAction{
                         actionCondition = LowHealth,
                         actionDescription = "You can't move because of the impact\n",
-                        actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the blood portal", AddTag "Already at the greengrass woods"]
+                        actionGameActions  =[]
                     },
                     InteractionAction{
-                        actionCondition = GameNot(TagExist "clear grass") ,
+                        actionCondition = GameAnd (GameNot LowHealth)(GameNot(TagExist "clear grass")) ,
                         actionDescription = "You can hardly see anything, the grass covers everything...\n",
                         actionGameActions  =[]
                     }
@@ -772,16 +792,7 @@ commonActions= Location{
     locationDescription = "",
     locationInteractions =
         [
-            LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["jump"]],
-                interactionActions =[
-                    InteractionAction {
-                        actionCondition = GameTrue,
-                        actionDescription  ="You jump up and down in the place",
-                        actionGameActions  = []
-                    }
-                ]
-            },
+            
 
             LocationInteraction {
                 interactionSentences = [getMeaningfulSentences ["view","bag"]],
