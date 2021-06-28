@@ -30,7 +30,7 @@ verbs = [
     Verb "attack" ["attack"],
     Verb "who Iam"["who Iam","who iam","WHO IAM"],
     Verb "attack" ["attack"],
-    Verb "speak" ["speak"],
+    Verb "speak" ["speak", "talk"],
     Verb "activate" ["activate"],
     Verb "enter" ["enter"]
     ]
@@ -68,7 +68,8 @@ nouns = [
     Noun "the gate guardian" ["the gate guardian"],
     Noun "fire container1" ["fire container1"],
     Noun "fire container2" ["fire container2"],
-    Noun "fire container3" ["fire container3"]
+    Noun "fire container3" ["fire container3"],
+    Noun "guardian" ["guardian"]
     ]
 
 prepositions :: [Token]
@@ -77,7 +78,7 @@ prepositions =[
     Preposition "into" ["into"],
     Preposition "the" ["the"],
     Preposition "with" ["with"],
-    Preposition "to" ["with"]
+    Preposition "to" ["to"]
     ]
 
 worldWords :: [Token]
@@ -744,19 +745,18 @@ nightsDawn= Location{
                     InteractionAction {
                         actionCondition = YouAlreadyHaveThisItem "key" ,
                         actionDescription  = "You have entered the dungeon",
-                        actionGameActions  = [RemoveTag  "Already at fire container3",RemoveTag "Already at fire container1",
-                        RemoveTag "Already at fire container2", NextLocation "bot"]
+                        actionGameActions  = [RemoveTag  "Already at fire container3", NextLocation "Xavius"]
                     },
                     InteractionAction {
-                        actionCondition = TagExist "Already at fire container3",
-                        actionDescription  = "You are already in fire container 3\n",
+                        actionCondition = GameNot(YouAlreadyHaveThisItem "key"),
+                        actionDescription  = "You need a key\n",
                         actionGameActions  = []
                     }
                     
                 ]
         },
         LocationInteraction {
-                interactionSentences = [getMeaningfulSentences ["talk", "to", "the gate guardian"]],
+                interactionSentences = [getMeaningfulSentences ["speak", "with", "guardian"]],
                 interactionActions =[
                     InteractionAction {
                         actionCondition = GameAnd(TagExist "Already at fire container3")(TagExist "gate guardian") ,

@@ -1,3 +1,5 @@
+
+
 Proyecto de Haskell
 
 
@@ -20,6 +22,34 @@ Version de Hasell usada:
 
 ```
 The Glorious Glasgow Haskell Compilation System, version 8.6.5
+```
+
+
+
+Módulos usados :
+
+```
+Data.Map
+System.IO
+Data.Time.Clock
+Data.List
+Data.Char
+System.Exit
+Data.List.Split
+Data.Time.LocalTime
+Data.Time
+```
+
+El proyecto esta dividido en 7 files .hs 
+
+```
+MainGame.hs
+GameProcessing.hs
+GameParser.hs
+GameModeling.hs
+GameLexer.hs
+GameUtils.hs
+GameData.hs
 ```
 
 
@@ -428,9 +458,119 @@ use fireball
 
 ![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/47.png)
 
+Una vez encendido el primer contenedor vamos al segundo
+
+```
+go to fire container2
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/51.png)
 
 
 
+Y lo encendemos con `use fireball`
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/53.png)
+
+Una vez encendido el contenedor 2 vamos al contenedor 3
+
+```
+go to fire container3
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/54.png)
+
+Ahora encendemos el contenedor 3
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/56.png)
+
+Una vez encendido el contenedor 3 sale un misterioso guardián que protege la puerta de dungeon.
+
+Debes hablar con el guardián
+
+```
+speak with guardian
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/60.png)
+
+El guardián te dará la llave de la puerta y un nuevo poder
+
+Ahora abre la puerta usando la llave que te dieron al escribir lo siguiente
+
+```
+open dungeon gate
+```
+
+
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/67.png)
+
+
+
+Esta puerta conduce al reto final que es derrotar  a Xavius
+
+Para derrotar a Xavius debes dar tres golpes con la espada pero cada vez que atacas a Xavius el te lanzará un ataque más poderoso por lo que debes de ir mirando tu vida para no morir
+
+Lanzamos el primer ataque
+
+Type:
+
+```
+attack boss
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/68.png)
+
+
+
+Ahora revisamos la vida
+
+```
+view status
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/70.png)
+
+Vemos que el jugador está bastante herido, es necesario recuperar vida antes del próximo ataque
+
+Usamos una poción
+
+```
+use potion
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/90.png)
+
+Ahora lanzamos el segundo ataque 
+
+```
+attack boss
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/91.png)
+
+Si volvemos a revisar la vida
+
+```
+view status
+```
+
+
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/92.png)
+
+Vemos que le queda muy poca al viajero podemos recuperar si nos quedan pociones pero como sabemos que el tercer ataque derrota a Xavius y el viajero siempre ataca primer
+
+Vovamos a atacar
+
+```
+attack boss
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/95.png)
+
+Una vez vencido Xavius has logrado completar el juego
 
 Una vez ejectutado debe de salir la historia principal del text adventure basada en un mundo ficticio  creado llamado "Fireblood" inspirado en algunas historias fant'asticas .
 
