@@ -54,12 +54,12 @@ nouns = [
     Noun "potion" ["potion"],
     Noun "blood portal" ["blood portal", "Blood Portal"],
     Noun "Xerneas spectrum" ["Xerneas spectrum"],
-    Noun "altar of Elders Darkfire" ["Altar of Elders Darkfire", "altar of Elders Darkfire" ],
+    Noun "altar" ["altar", "altar of Elders Darkfire"],
     Noun "boss" ["boss"],
     Noun "items"["items"],
-    Noun "globlin" ["goblin"],
+    Noun "goblin" ["goblin"],
     Noun "stormbridge sword" ["stormbridge sword"],
-    Noun "Blood Death Knight" ["Blood Death Knight"],
+    Noun "knight" ["knight", "Blood Death Knight"],
     Noun "greengrass woods" ["greengrass woods", "Greengrass Woods"],
     Noun "fireball" ["fireball"],
     Noun "teleport" ["teleport"],
@@ -255,12 +255,12 @@ casentinesi =
         "where the trees feed on the blood of the dead ...",
         locationInteractions = [
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["go to", "altar of Elders Darkfire"]],
+                interactionSentences = [getMeaningfulSentences ["go to", "altar"]],
                 
                 interactionActions =[
                     InteractionAction{
                         actionCondition = GameAnd(GameNot (TagExist  "Already at the altar"))(GameNot LowHealth),
-                        actionDescription = "The traveler walked to the altar of elders darkfire", 
+                        actionDescription = "The traveler walked to the Altar of Elders Darkfire\n", 
                         actionGameActions  =[AddTag  "Already at the altar"]
                     },
 
@@ -283,7 +283,7 @@ casentinesi =
             },
 
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["take", "stormbridge sword"]],
+                interactionSentences = [getMeaningfulSentences ["get", "stormbridge sword"]],
                 
                 interactionActions =[
                     InteractionAction{
@@ -332,7 +332,7 @@ casentinesi =
                     
                     -- Main
                     InteractionAction{
-                        actionCondition = GameAnd (GameNot(TagExist "Already at the altar")) (GameAnd(GameNot (TagExist "Already at the blood portal"))
+                        actionCondition = GameAnd (GameAnd(GameNot(TagExist "Already at the altar")) (GameNot(TagExist "Already at greengrass woods"))) (GameAnd(GameNot (TagExist "Already at the blood portal"))
                         (GameNot (TagExist "Already at the greengrass woods"))),
                         actionDescription = "Nearby there is a mysterious altar called Altar of Elders Darkfire\n"++
                         "Nearby is a mysterious portal called Blood Portal\n"++ "Nearby  there is a mysterious woods called Greengrass Woods\n"
@@ -345,7 +345,7 @@ casentinesi =
             
             },
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["speak", "with","Blood Death Knight"]],
+                interactionSentences = [getMeaningfulSentences ["speak", "with","knight"]],
                 
                 interactionActions =[
                     InteractionAction{
@@ -418,7 +418,7 @@ casentinesi =
                     InteractionAction{
                         actionCondition = GameAnd (GameNot LowHealth)(GameNot(TagExist "Already at greengrass woods")) ,
                         actionDescription = "The traveler walked to the greengrass woods...\n",
-                        actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the blood portal", AddTag "Already at the greengrass woods"]
+                        actionGameActions  =[RemoveTag "Already at the altar",RemoveTag "Already at the blood portal", AddTag "Already at greengrass woods"]
                     },
                     InteractionAction{
                         actionCondition = LowHealth,
@@ -447,6 +447,7 @@ casentinesi =
                     InteractionAction{
                         actionCondition = GameAnd(TagExist "Already at greengrass woods")(GameNot(TagExist "clear grass")) ,
                         actionDescription = "You can hardly see anything, the grass covers everything...\n"++
+                        "By using fire everything was cleared\n"++
                         "Suddenly the same goblin that had stolen the teleport appears\n",
                         actionGameActions  =[AddTag "clear grass",AddTag "goblin appear"]
                     },
@@ -471,23 +472,23 @@ casentinesi =
             
             },
             LocationInteraction{
-                interactionSentences = [getMeaningfulSentences ["attack", "globlin"]],
+                interactionSentences = [getMeaningfulSentences ["attack", "goblin"]],
                 
                 interactionActions =[
                     InteractionAction{
                         actionCondition = GameAnd (TagExist "Already at greengrass woods")(GameAnd(YouAlreadyHaveThisItem "stormbridge sword")(TagExist "goblin appear")),
-                        actionDescription = "The traveler attacks the globlin with his sword... \n"++
+                        actionDescription = "The traveler attacks the goblin with his sword... \n"++
                         "The goblin dies ...\n. When he dies he drops a bag with various items\n",
                         actionGameActions  =[RemoveTag "goblin appear",AddTag "There are items on the greengrass floor"]
                     },
                     InteractionAction{
-                        actionCondition = GameOr(TagExist "globlin appear")(GameNot (TagExist "Already at greengrass woods")) ,
+                        actionCondition = GameOr(GameNot(TagExist "goblin appear"))(GameNot (TagExist "Already at greengrass woods")) ,
                         actionDescription = "There is no one to attack...\n",
                         actionGameActions  =[]
                     },
                     InteractionAction{
-                        actionCondition = GameAnd(TagExist "globlin appear")(GameAnd(TagExist "Already at greengrass woods")(GameNot(YouAlreadyHaveThisItem "stormbridge sword"))),
-                        actionDescription = "You have nothing to attack with.\n The globin laughs and hits you black blood...\n",
+                        actionCondition = GameAnd(TagExist "goblin appear")(GameAnd(TagExist "Already at greengrass woods")(GameNot(YouAlreadyHaveThisItem "stormbridge sword"))),
+                        actionDescription = "You have nothing to attack with.\n The goblin laughs and hits you black blood...\n",
                         actionGameActions  =[RDamage 50]
                     }
                     

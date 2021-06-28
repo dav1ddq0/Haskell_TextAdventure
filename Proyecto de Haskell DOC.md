@@ -218,6 +218,110 @@ Como dice la descripción hay 3 lugares a los que podemos ir. Para moverte a los
 
 
 
+Si vamos primero al `altar of Elders Darkfire` escribimos go to altar of Elders Darkfire y nos imprime en pantalla lo siguiente:
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/25.png)
+
+Si escribimos `look around` nos mostrará información relevante del lugar:
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/26.png)
+
+Según la información podemos tomar una espado y hablar con un misterioso caballero
+
+Para tomar la espada escribimos:
+
+```
+take stormbridge sword
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/27.png)
+
+Esta espada será necesario para los combates de los contrario estarás desprotegido ante cualquier amenaza
+
+Para hablar con el misterioso caballero escribimos:
+
+```
+speak with Blood Death Knight
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/29.png)
+
+Al hablar con el caballero este te dará el poder de fireball que será necesario en la travesía
+
+
+
+Luego que obtengamos el poder fireball y la espada no hay más nada que hacer cerca del altar
+
+Ahora nos movemos a Blood Portal para eso escribimos:
+
+```
+go to blood portal
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/30.png)
+
+La primera vez que se mueva el viajero al Blood Portal será detonada una bomba que dejará al viajero con muy poca vida incapaz de moverse.
+
+Será necesario que uses una poción para que recupere vida y pueda continuar con la travesía
+
+Si escribes 
+
+```
+view status
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/31.png)
+
+Podrás ver que en efecto la vida el player está muy baja
+
+Ahora usamos una poción permita recuperar 60 de vida
+
+Escribes :
+
+```
+use potion
+```
+
+y al volver a revisar el estado vemos que recuperó un poco de vida
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/33.png)
+
+Ahora que el usuario recuperó un poco de vida se puede mover
+
+ Ahora nos movemos a Greengrass Woods, para eso escribimos:
+
+```
+go to greengrass woods
+```
+
+Este lugar está cubierto por hierba alta y no se ve casi nada
+
+Ahora que disponemos de la habilidad fireball la usamos para despejar el lugar
+
+Escribimos
+
+```
+use fireball
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/34.png)
+
+al despejar el lugar sale el goblin que había robado el teleport 
+
+Será necesario que lo mates usando la espada
+
+Para matar al goblin escribe
+
+```
+attack goblin
+```
+
+![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/36.png)
+
+
+
+
+
 
 
 
