@@ -58,7 +58,7 @@ GameData.hs
 
 en GameModeling.hs está definida la idea general de como decidimos hacer el text adventure
 
-Usando las características que tiene el leguaje haskell para definir nuevos tipos datoso usando records  lo que permite extraer luego el campo que se necesite
+Usando las características que tiene el leguaje haskell para definir nuevos tipos de datos usando records  lo que permite extraer luego el campo que se necesite.
 
 Lo más general del juego lo definimos con World :
 
@@ -72,7 +72,7 @@ data World = World{
 }deriving (Show, Eq)
 ```
 
-El juego está formado por un conjunto de locations que representa cada escenario del juego. De la forma que está hecho es bastante extensible pues definiendo nuevos locations e interconectándolos con los ya existenten se puede ampliar y añadir nuevas opciones a la historia. Además tiene un jugador, una lista de etiquetas , una listas de finales y un location especial que sirve para definir las acciones generales que se hacen en el juego sin definir en que location esté el jugador actualmente. Las etiquetas son muy útiles pueden sirven para definir que cosas han pasado en el juego como a donde se ha ido  etc, con estás se puede saber  también si el jugador ya consiguió determinado objetivo como hablar con un héroe etc. 
+El juego está formado por un conjunto de locations que representa cada escenario del juego. De la forma que está hecho es bastante extensible pues definiendo nuevos locations e interconectándolos con los ya existenten se puede ampliar y añadir nuevas opciones a la historia. Además tiene un jugador, una lista de etiquetas , una listas de finales y un location especial que sirve para definir las acciones generales que se hacen en el juego sin definir en que location esté el jugador actualmente. Las etiquetas son muy útiles pues sirven para definir que cosas han pasado en el juego, como a donde se ha ido  etc, con estás se puede saber  también si el jugador ya consiguió determinado objetivo como hablar con un héroe etc. 
 
 Un jugador está definido como:
 
@@ -86,7 +86,7 @@ data Player = Player {
 }deriving(Show,Eq)
 ```
 
- Tiene un nombre se define con el que se escriba en la consola, una vida y magia que inicialmente valen 100 y siempre tienen un valor entre 0 y 100.
+ Tiene un nombre, se define con el que se escriba en la consola, una vida y magia que inicialmente valen 100 y siempre tienen un valor entre 0 y 100.
 
 El player también posee un inventario en el cual van a estar los items que vaya cogiendo en la travesía
 
@@ -100,11 +100,11 @@ data Location = Location {
 } deriving(Show,Eq)
 ```
 
-Tiene un id , una descripción la cual se imprime en pantalla  y una listas de interacciones las cuales matchearán o no con lo que escriba el usuario
+Tiene un id , una descripción la cual se imprime en pantalla  y una listas de interacciones las cuales machearán o no con lo que escriba el usuario
 
 Con el tipo GameCondition definimos todos las posibles condicionales que se usarán en el juego
 
-Esto permite definir cuando 
+Esto permite definir cuando
 
 ```
 data GameCondition = YouAlreadyHaveThisItem String |
@@ -124,8 +124,8 @@ data GameCondition = YouAlreadyHaveThisItem String |
 Estas condicionales se verfican en `GameProcessing.hs` con el método  evalCondition usando pattern matching
 
 ```
--- Evaluar la condicion para saber si se cumple la interaccion
 -- -------------------------------------------------------------------------------
+-- Evaluar la condicion para saber si se cumple la interacción
 evalCondition :: GameCondition -> World -> Location-> Bool
 evalCondition GameTrue _ _  = True 
 evalCondition GameFalse _ _  = False 
@@ -194,7 +194,7 @@ data GameAction     =  AddItemToBag String|
 
 Una vez que matchee un InteractionAction se manda a ejecutar cada GameAction definido en este
 
-A GameAction también se le pueden agregar fácilmente nuevas acciones que se quieran a agregar al juego dada su definición.
+A GameAction también se le pueden agregar fácilmente nuevas acciones que se quieran agregar al juego dada su definición.
 
 
 
@@ -309,7 +309,7 @@ give me the time
 use potion
 ```
 
-`Permite en caso que el jugador disponga de pociones para la vidad en su bolsa recuperar un porciento de vida perdido`
+`Permite en caso que el jugador disponga de pociones para la vidad en su bolsa recuperar un porciento de vida perdida`
 
 ![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/9.png)
 
@@ -317,7 +317,7 @@ use potion
 use energy drink
 ```
 
-`Permite en caso que el jugador dispoga de bebidas energizantes en su bolsa recuperar un porciento de magia perdido`
+`Permite en caso que el jugador disponga de bebidas energizantes en su bolsa recuperar un porciento de magia perdida`
 
 ![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/10.png)
 
@@ -383,7 +383,7 @@ use mantra fusion
 
  ![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/17.png)
 
-Ahora con la fusión de `rhydon drill` y `magic stick` has obtenido un nuevo objeto `rockbreaker` que te va a servir para poder desbloquear la salida .
+Ahora con la fusión de `rhydon drill` y `magic stick` has obtenido un nuevo objeto `rockbreaker` que te va a servir para poder desbloquear la salida.
 
 Si ahora revisamos la bolsa escribiendo `view bag`
 
@@ -429,7 +429,7 @@ Si escribimos `look around` nos mostrará información relevante del lugar:
 
 ![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/26.png)
 
-Según la información podemos tomar una espado y hablar con un misterioso caballero
+Según la información podemos tomar una espada y hablar con un misterioso caballero
 
 Para tomar la espada escribimos:
 
@@ -491,7 +491,7 @@ y al volver a revisar el estado vemos que recuperó un poco de vida
 
 Ahora que el usuario recuperó un poco de vida se puede mover
 
- Ahora nos movemos a Greengrass Woods, para eso escribimos:
+Ahora nos movemos a Greengrass Woods, para eso escribimos:
 
 ```
 go to greengrass woods
@@ -744,13 +744,3 @@ attack boss
 ![](/mnt/048835ED8835DDBC/School/3ro/Programacion Declarativa/Proyecto Haskell/Code/3/Haskell_TextAdventure/Images/95.png)
 
 Una vez vencido Xavius has logrado completar el juego
-
-Una vez ejectutado debe de salir la historia principal del text adventure basada en un mundo ficticio  creado llamado "Fireblood" inspirado en algunas historias fant'asticas .
-
-
-
-El juego esta estructurado en un conjunto de lugares llamados location que representa cada parte del juego un jugador y todo eso se mete en world
-
-Usamos bastante el pattern matching para el parser 
-
-El juevo tiene un conjunto de etiquetas que describes que acciones han de hacerse luego que se matche con una interaccion
